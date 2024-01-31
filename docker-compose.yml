@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   mysql:
-    image: mysql
+    container_name: users_mysql_db
+    image: mysql:8.2
     restart: always
     environment:
       MYSQL_DATABASE: file_storage
