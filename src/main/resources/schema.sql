@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS users (
     password CHAR(60) NOT NULL,
     CONSTRAINT pk_id PRIMARY KEY (id),
     CONSTRAINT uq_username UNIQUE (username)
-)
+);
