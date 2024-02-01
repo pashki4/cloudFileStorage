@@ -2,6 +2,7 @@ package dev.pasha.cloudfilestorage.controller;
 
 import dev.pasha.cloudfilestorage.model.User;
 import dev.pasha.cloudfilestorage.repository.UserRepository;
+import dev.pasha.cloudfilestorage.service.UserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -13,13 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping
 public class LoginController {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+
+    private final UserRegistrationService userRegistrationService;
 
     @Autowired
-    public LoginController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public LoginController(UserRegistrationService userRegistrationService) {
+        this.userRegistrationService = userRegistrationService;
     }
 
     @GetMapping("/")
@@ -38,15 +38,14 @@ public class LoginController {
     }
 
     @GetMapping("/signup")
-    public String register(Model model) {
+    public String getSignupForm(Model model) {
         model.addAttribute("user", new User());
         return "signup-form";
     }
 
     @PostMapping("/signup")
-    public String signupPost(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+    public String signupUser(User user) {
+        userRegistrationService.register(user);
         return "redirect:/";
     }
 }
