@@ -11,12 +11,10 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @Testcontainers
 @DataJpaTest
@@ -38,7 +36,8 @@ class UserRepositoryTest {
 
     @BeforeEach
     void setup() {
-        List<User> users = List.of(new User("newUser", "password"));
+        List<User> users = List.of(new User("newUser", "password"),
+                new User("newUser2", "password"));
         userRepository.saveAll(users);
     }
 
@@ -51,6 +50,6 @@ class UserRepositoryTest {
     @Test
     void shouldReturnCountOfUsers() {
         List<User> users = userRepository.findAll();
-        assertThat(users.size()).isEqualTo(1);
+        assertThat(users.size()).isEqualTo(2);
     }
 }

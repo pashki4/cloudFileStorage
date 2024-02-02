@@ -20,7 +20,6 @@ public class UserRegistrationService {
     }
 
     public void register(User user) {
-        // NotUniqueUserException.class can be thrown.
         encodeUserPassword(user);
         userRepository.save(user);
     }

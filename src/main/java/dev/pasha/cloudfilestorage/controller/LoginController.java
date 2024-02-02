@@ -51,7 +51,7 @@ public class LoginController {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ModelAndView exceptionHandler(DataIntegrityViolationException ex) {
+    public ModelAndView uniqueUsernameExceptionHandler(DataIntegrityViolationException ex) {
         ModelAndView model = new ModelAndView("signup-form");
         model.addObject("errorMessage", "This username is already in use");
         model.addObject("user", new User());
