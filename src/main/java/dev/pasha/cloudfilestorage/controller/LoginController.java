@@ -1,15 +1,16 @@
 package dev.pasha.cloudfilestorage.controller;
 
 import dev.pasha.cloudfilestorage.model.User;
-import dev.pasha.cloudfilestorage.repository.UserRepository;
 import dev.pasha.cloudfilestorage.service.UserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping
@@ -47,5 +48,13 @@ public class LoginController {
     public String signupUser(User user) {
         userRegistrationService.register(user);
         return "redirect:/";
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ModelAndView exceptionHandler(DataIntegrityViolationException ex) {
+        ModelAndView model = new ModelAndView("signup-form");
+        model.addObject("errorMessage", "This username is already in use");
+        model.addObject("user", new User());
+        return model;
     }
 }

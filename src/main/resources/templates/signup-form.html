@@ -14,8 +14,8 @@
 </head>
 <body>
 <h1>Please Signup</h1>
-<div th:if="${param.error}">
-    Invalid credentials.
+<div th:if="${errorMessage}">
+    <p th:text="${errorMessage}">Error message</p>
 </div>
 <div th:if="${param.logout}">
     You have been logged out.
