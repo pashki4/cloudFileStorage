@@ -1,6 +1,7 @@
 package dev.pasha.cloudfilestorage.controller;
 
 import dev.pasha.cloudfilestorage.model.User;
+import dev.pasha.cloudfilestorage.service.SimpleStorageService;
 import dev.pasha.cloudfilestorage.service.UserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,10 +18,12 @@ import org.springframework.web.servlet.ModelAndView;
 public class LoginController {
 
     private final UserRegistrationService userRegistrationService;
+    private final SimpleStorageService simpleStorageService;
 
     @Autowired
-    public LoginController(UserRegistrationService userRegistrationService) {
+    public LoginController(UserRegistrationService userRegistrationService, SimpleStorageService simpleStorageService) {
         this.userRegistrationService = userRegistrationService;
+        this.simpleStorageService = simpleStorageService;
     }
 
     @GetMapping("/")
@@ -34,7 +37,8 @@ public class LoginController {
     }
 
     @GetMapping("/auth")
-    public String auth() {
+    public String auth(Model model) {
+        simpleStorageService.uploadObject();
         return "auth-header";
     }
 
@@ -47,6 +51,7 @@ public class LoginController {
     @PostMapping("/signup")
     public String signupUser(User user) {
         userRegistrationService.register(user);
+        simpleStorageService.register(user);
         return "redirect:/";
     }
 
