@@ -13,7 +13,7 @@
     <title>Cloud Storage</title>
   </head>
   <body>
-    <nav class="navbar navbar-light fixed-top bg-body-tertiary">
+    <nav class="navbar navbar-static-top navbar-light bg-body-tertiary mb-5">
       <div class="container-fluid ms-4">
         <a class="navbar-brand" href="#">Icon</a>
 
@@ -38,6 +38,10 @@
         </form>
       </div>
     </nav>
+
+    <div th:if="${objects}">
+        <p th:each="object : ${objects}" th:text="${object.get().objectName()}">Object</p>
+    </div>
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
   </body>
 </html>

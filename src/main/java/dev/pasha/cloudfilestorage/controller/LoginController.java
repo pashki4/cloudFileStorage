@@ -3,6 +3,8 @@ package dev.pasha.cloudfilestorage.controller;
 import dev.pasha.cloudfilestorage.model.User;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
 import dev.pasha.cloudfilestorage.service.UserRegistrationService;
+import io.minio.Result;
+import io.minio.messages.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
@@ -32,13 +34,14 @@ public class LoginController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String getLoginForm() {
         return "login-form";
     }
 
-    @GetMapping("/auth")
+    @PostMapping("/auth")
     public String auth(Model model) {
-        simpleStorageService.uploadObject();
+        Iterable<Result<Item>> objects = simpleStorageService.getObjectsFromAllBuckets();
+        model.addAttribute("objects", objects);
         return "auth-header";
     }
 
@@ -49,10 +52,10 @@ public class LoginController {
     }
 
     @PostMapping("/signup")
-    public String signupUser(User user) {
+    public String signup(User user) {
         userRegistrationService.register(user);
         simpleStorageService.register(user);
-        return "redirect:/";
+        return "redirect:/auth";
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

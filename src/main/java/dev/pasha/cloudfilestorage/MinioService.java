@@ -8,35 +8,47 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MinioService {
 
     public static void main(String[] args) throws Exception {
-        MinioClient newUser = MinioClient.builder()
-                .endpoint("http://localhost:9000")
-                .credentials("newUser", "12341234")
-                .build();
-
-        newUser.listBuckets().forEach(System.out::println);
-
+//        MinioClient client = MinioClient.builder()
+//                .endpoint("http://localhost:9000")
+//                .credentials("newUser", "$2a$10$paq3CTXy0bIkTJkABc0XW.c/PLzvBbSDWXJOIzJqp.7SPy9eXnxwK")
+//                .build();
+//        createBucket(client);
+//        addBucketPolicy(client);
+        Iterable<String> it1 = List.of("it1");
+        Iterable<String> it2 = List.of("it2");
+        Iterable<String> it3 = List.of("it3");
+        List<Iterable<String>> input = List.of(it1, it2, it3);
+        List<String> result = new ArrayList<>();
+        input.forEach(iterable -> iterable.forEach(result::add));
+        System.out.println(result);
     }
 
     private static void listObjects(MinioClient client) {
-        String bucketName = "new-user-bucket";
-        ListObjectsArgs listObjectsArgs = ListObjectsArgs.builder()
-                .bucket(bucketName)
-                .recursive(true)
-                .build();
-        Iterable<Result<Item>> results = client.listObjects(listObjectsArgs);
+        String bucketName = "newuser--private-bucket";
+        Iterable<Result<Item>> results = client.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucketName)
+                        .recursive(true)
+                        .build()
+        );
         results.forEach(result -> {
             try {
                 Item item = result.get();
-                System.out.println("Item: " + "\n" +
-                                   "item.etag() -> " + item.etag() + "\n" +
-                                   "item.objectName() -> " + item.objectName() + "\n" +
-                                   "item.storageClass() -> " + item.storageClass() + "\n" +
-                                   "item.versionId() -> " + item.versionId() + "\n" +
-                                   "item.isDir() -> " + item.isDir() + "\n"
+                System.out.println("Item: " + "n" +
+                                   "item.etag() -> " + item.etag() + "n" +
+                                   "item.objectName() -> " + item.objectName() + "n" +
+                                   "item.storageClass() -> " + item.storageClass() + "n" +
+                                   "item.versionId() -> " + item.versionId() + "n" +
+                                   "item.isDir() -> " + item.isDir() + "n"
                 );
             } catch (ErrorResponseException | InsufficientDataException | InternalException | InvalidKeyException |
                      InvalidResponseException | IOException | NoSuchAlgorithmException | ServerException |
@@ -48,15 +60,13 @@ public class MinioService {
     }
 
     private static void uploadObject(MinioClient client) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, URISyntaxException {
-        String bucketName = "new-user-bucket";
-        String objectName = "/temp/1.knew";
-//        String contentType = "";
-        String fileName = "C:\\Users\\pasha\\Desktop\\file1.weba";
+        String bucketName = "newUser-private-bucket";
+//        String objectName = "/temp/1.knew";
+        String fileName = "C:\\Users\\pasha\\Desktop\\test.cpp";
         UploadObjectArgs uploadObjectArgs = UploadObjectArgs.builder()
                 .bucket(bucketName)
-                .object(objectName)
+//                .object(objectName)
                 .filename(fileName)
-//                .contentType(contentType)
                 .build();
 
         client.uploadObject(uploadObjectArgs);
@@ -68,16 +78,37 @@ public class MinioService {
     }
 
     private static void createBucket(MinioClient client) throws Exception {
-        String bucketName = "java-demo-bucket";
-        MakeBucketArgs makeBucketArgs = MakeBucketArgs.builder()
-                .bucket(bucketName)
-                .build();
+        String bucketName = "newuser-private-bucket";
 
-        BucketExistsArgs bucketExistsArgs = BucketExistsArgs.builder()
+        client.makeBucket(MakeBucketArgs.builder()
                 .bucket(bucketName)
-                .build();
+                .build());
+    }
 
-        client.makeBucket(makeBucketArgs);
+    private static void addBucketPolicy(MinioClient client) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        String policyJson = "{ \"Version\": \"2012-10-17\", \"Statement\": [{ \"Sid\": \"newUser-write-only\", \"Effect\": \"Allow\", \"Principal\": {\"AWS\": [\"minio:users/newUser\"]}, \"Action\": [\"s3:PutObject\", \"s3:ListBucketMultipartUploads\", \"s3:AbortMultipartUpload\"], \"Resource\": [\"arn:aws:s3:::newuser-private-bucket/*\"] }] }";
+//                    """
+//                    {
+//                        "Version": "2012-10-17",
+//                        "Statement ": [
+//                           {
+//                              "Sid": "newUser-write-only",
+//                              "Effect": "Allow",
+//                              "Principal": "AWS": "arn:aws:iam::your-account-id:user/newUser",
+//                              "Action": [
+//                                 "s3:PutObject",
+//                                 "s3:ListBucketMultipartUploads",
+//                                 "s3:AbortMultipartUpload"
+//                              ],
+//                              "Resource": "arn:aws:s3::newuser-private-bucket/*"
+//                          }
+//                    }
+//                """;
+
+        client.setBucketPolicy(SetBucketPolicyArgs.builder()
+                .bucket("newuser-private-bucket")
+                .config(policyJson)
+                .build());
     }
 
 }
