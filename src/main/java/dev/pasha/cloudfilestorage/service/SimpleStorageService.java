@@ -6,12 +6,14 @@ import io.minio.messages.Item;
 
 public interface SimpleStorageService {
 
-    Iterable<Result<Item>> getObjectsFromAllBuckets();
+    Iterable<Result<Item>> getObjects();
 
-    void uploadObject();
+    void uploadObject(String fileUrl) throws Exception;
 
     void deleteObject();
 
-    void register(User user);
+    void renameObject();
+
+    void register(User user) throws Exception;
 
 }

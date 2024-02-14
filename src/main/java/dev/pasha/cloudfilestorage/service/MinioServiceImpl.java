@@ -5,73 +5,37 @@ import io.minio.*;
 import io.minio.admin.MinioAdminClient;
 import io.minio.admin.UserInfo;
 import io.minio.messages.Item;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class MinioServiceImpl implements SimpleStorageService {
 
-    private static final String BUCKET_NAME = "-private-bucket";
+    private static final String BUCKET_NAME_POSTFIX = "-private-bucket";
 
     @Override
-    public Iterable<Result<Item>> getObjectsFromAllBuckets() {
+    public Iterable<Result<Item>> getObjects() {
         MinioClient client = getClient();
         return client.listObjects(ListObjectsArgs.builder()
                 .delimiter("/")
                 .recursive(true)
-                .bucket(getUserDetails().getUsername().toLowerCase() + BUCKET_NAME)
+                .bucket(getUserDetails().getUsername().toLowerCase() + BUCKET_NAME_POSTFIX)
                 .build()
         );
     }
 
 
-    private static MakeBucketArgs getMakeBucketArgs(UserDetails userDetails) {
-        return MakeBucketArgs.builder()
-                .bucket(userDetails.getUsername().toLowerCase() + BUCKET_NAME)
-                .build();
-    }
-
-    private static BucketExistsArgs getBucketArgs(UserDetails userDetails) {
-        return BucketExistsArgs.builder()
-                .bucket(userDetails.getUsername().toLowerCase() + BUCKET_NAME)
-                .build();
-    }
-
-    private ListObjectsArgs createListObjectsArgs(String bucketName) {
-        return ListObjectsArgs.builder()
-                .bucket(bucketName)
-                .recursive(true)
-                .build();
-    }
-
     @Override
-    public void uploadObject() {
+    public void uploadObject(String fileUrl) throws Exception {
         MinioClient client = getClient();
-        validateClientBucket(client);
-        UploadObjectArgs uploadObjectArgs = UploadObjectArgs.builder()
-                .bucket(getUserDetails().getUsername() + BUCKET_NAME)
-//                .object()
-                .build();
-    }
-
-    private void validateClientBucket(MinioClient client) {
-        UserDetails userDetails = getUserDetails();
-        BucketExistsArgs bucketArgs = getBucketArgs(userDetails);
-        try {
-            if (!client.bucketExists(bucketArgs)) {
-                MakeBucketArgs makeBucketArgs = getMakeBucketArgs(userDetails);
-                client.makeBucket(makeBucketArgs);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        client.uploadObject(UploadObjectArgs.builder()
+                        .bucket(getUserDetails().getUsername().toLowerCase() + BUCKET_NAME_POSTFIX)
+                        .object("current_position + file_name")
+                        .filename(fileUrl)
+                .build());
     }
 
     @Override
@@ -80,9 +44,42 @@ public class MinioServiceImpl implements SimpleStorageService {
     }
 
     @Override
-    public void register(User user) {
+    public void renameObject() {
+
+    }
+
+    @Override
+    public void register(User user) throws Exception {
         MinioAdminClient adminClient = getAdminClient();
-        addNewUserWithPolicy(adminClient, user);
+        addNewReadWriteUser(adminClient, user);
+        createUserBucket(user);
+    }
+
+    private void createUserBucket(User user) throws Exception {
+        MinioClient client = MinioClient.builder()
+                .endpoint("localhost", 9000, false)
+                .credentials(user.getUsername(), user.getPassword())
+                .build();
+        //
+        /*
+        MINIO BUCKET-NAMING RULES:
+            Bucket names must be between 3 (min) and 63 (max) characters long.
+            Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).
+            Bucket names must not contain two adjacent periods, or a period adjacent to a hyphen.
+            Bucket names must not be formatted as an IP address (for example, 192.168.5.4).
+            Bucket names must not start with the prefix xn--.
+            Bucket names must not end with the suffix -s3alias. This suffix is reserved for access point alias names.
+            Bucket names must be unique within a partition.
+         */
+        if (!client.bucketExists(BucketExistsArgs.builder()
+                .bucket(user.getUsername().toLowerCase() + BUCKET_NAME_POSTFIX)
+                .build())
+        ) {
+            client.makeBucket(MakeBucketArgs.builder()
+                    .bucket(user.getUsername().toLowerCase() + BUCKET_NAME_POSTFIX)
+                    .build()
+            );
+        }
     }
 
     private MinioAdminClient getAdminClient() {
@@ -92,65 +89,10 @@ public class MinioServiceImpl implements SimpleStorageService {
                 .build();
     }
 
-    private void addNewUserWithPolicy(MinioAdminClient adminClient, User user) {
-        String policyJson = getPolicyJson(user);
-        try {
-            adminClient.addCannedPolicy(user.getUsername().toLowerCase(), policyJson);
-            adminClient.addUser(user.getUsername(), UserInfo.Status.ENABLED, user.getPassword(),
-                    user.getUsername().toLowerCase(), Arrays.asList("my-group"));
-            adminClient.setPolicy(user.getUsername(), false, user.getUsername().toLowerCase());
-        } catch (NoSuchAlgorithmException | InvalidKeyException | IOException | InvalidCipherTextException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static String getPolicyJson(User user) {
-        String policyJson = String.format(
-                """
-                        {
-                          "Version": "2012-10-17",
-                          "Statement": [
-                            {
-                              "Effect": "Allow",
-                              "Principal": {
-                                "AWS": [
-                                  "*"
-                                ]
-                              },
-                              "Action": [
-                                "s3:GetBucketLocation",
-                                "s3:ListBucket",
-                                "s3:ListBucketMultipartUploads"
-                              ],
-                              "Resource": [
-                                "arn:aws:s3:::%s"
-                              ]
-                            },
-                            {
-                              "Effect": "Allow",
-                              "Principal": {
-                                "AWS": [
-                                  "*"
-                                ]
-                              },
-                              "Action": [
-                                "s3:AbortMultipartUpload",
-                                "s3:DeleteObject",
-                                "s3:GetObject",
-                                "s3:ListMultipartUploadParts",
-                                "s3:PutObject"
-                              ],
-                              "Resource": [
-                                "arn:aws:s3:::%s/*"
-                              ]
-                            }
-                          ]
-                        }
-                        """
-                ,
-                user.getUsername().toLowerCase() + BUCKET_NAME, user.getUsername().toLowerCase() + BUCKET_NAME
-        );
-        return policyJson;
+    private void addNewReadWriteUser(MinioAdminClient adminClient, User user) throws Exception {
+        adminClient.addUser(user.getUsername(), UserInfo.Status.ENABLED, user.getPassword(),
+                "readwrite", List.of("my-group"));
+        adminClient.setPolicy(user.getUsername(), false, "readwrite");
     }
 
     private MinioClient getClient() {

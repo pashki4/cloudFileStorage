@@ -1,19 +1,17 @@
 package dev.pasha.cloudfilestorage.controller;
 
+import dev.pasha.cloudfilestorage.exception.UserRegMinioServiceException;
 import dev.pasha.cloudfilestorage.model.User;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
 import dev.pasha.cloudfilestorage.service.UserRegistrationService;
 import io.minio.Result;
 import io.minio.messages.Item;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping
@@ -40,7 +38,7 @@ public class LoginController {
 
     @PostMapping("/auth")
     public String auth(Model model) {
-        Iterable<Result<Item>> objects = simpleStorageService.getObjectsFromAllBuckets();
+        Iterable<Result<Item>> objects = simpleStorageService.getObjects();
         model.addAttribute("objects", objects);
         return "auth-header";
     }
@@ -53,16 +51,12 @@ public class LoginController {
 
     @PostMapping("/signup")
     public String signup(User user) {
-        userRegistrationService.register(user);
-        simpleStorageService.register(user);
+        try {
+            userRegistrationService.register(user);
+            simpleStorageService.register(user);
+        } catch (Exception e) {
+            throw new UserRegMinioServiceException("Error registering user: " + user, e);
+        }
         return "redirect:/auth";
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ModelAndView uniqueUsernameExceptionHandler(DataIntegrityViolationException ex) {
-        ModelAndView model = new ModelAndView("signup-form");
-        model.addObject("errorMessage", "This username is already in use");
-        model.addObject("user", new User());
-        return model;
     }
 }

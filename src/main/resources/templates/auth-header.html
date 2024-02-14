@@ -39,8 +39,8 @@
       </div>
     </nav>
 
-    <div th:if="${objects}">
-        <p th:each="object : ${objects}" th:text="${object.get().objectName()}">Object</p>
+      <div th:if="${not #lists.isEmpty(objects)}">
+        <p th:each="object : ${objects}" th:text="${object.get()}">Object</p>
     </div>
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
   </body>
