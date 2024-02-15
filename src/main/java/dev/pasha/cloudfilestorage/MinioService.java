@@ -9,27 +9,11 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MinioService {
 
-    public static void main(String[] args) throws Exception {
-//        MinioClient client = MinioClient.builder()
-//                .endpoint("http://localhost:9000")
-//                .credentials("newUser", "$2a$10$paq3CTXy0bIkTJkABc0XW.c/PLzvBbSDWXJOIzJqp.7SPy9eXnxwK")
-//                .build();
-//        createBucket(client);
-//        addBucketPolicy(client);
-        Iterable<String> it1 = List.of("it1");
-        Iterable<String> it2 = List.of("it2");
-        Iterable<String> it3 = List.of("it3");
-        List<Iterable<String>> input = List.of(it1, it2, it3);
-        List<String> result = new ArrayList<>();
-        input.forEach(iterable -> iterable.forEach(result::add));
-        System.out.println(result);
+    public static void main(String[] args) {
     }
 
     private static void listObjects(MinioClient client) {

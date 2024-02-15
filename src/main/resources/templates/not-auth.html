@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div th:fragment="header">
+    <nav class="navbar navbar-static-top navbar-light fixed-top bg-body-tertiary">
+        <div class="container-fluid ms-4">
+            <a class="navbar-brand" th:href="@{/}"><img src="/images/icon.jpg" alt="icon"
+                                                        class="img-thumbnail icon"></a>
+
+            <!-- Image -->
+            <img src="/images/start.jpg" class="img-thumbnail image me-2" alt="image"/>
+
+            <!-- Login / Signup -->
+            <div class="d-flex w-auto">
+                <form class="me-2" th:action="@{/login}" th:method="get">
+                    <button type="submit" class="btn text-bg-primary">Login</button>
+                </form>
+
+                <form class="me-4" th:action="@{/signup}" th:method="get">
+                    <button type="submit" class="btn btn-outline-warning text-bg-warning">Signup</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+</div>
+</body>
+</html>

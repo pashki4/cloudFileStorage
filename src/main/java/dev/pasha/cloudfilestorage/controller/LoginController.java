@@ -41,7 +41,12 @@ public class LoginController {
 
     @GetMapping("/")
     public String defaultPage() {
-        return "unauth-header";
+        return "index";
+    }
+
+    @PostMapping("/")
+    public String defaultPagePost() {
+        return "index";
     }
 
     @GetMapping("/login")
@@ -53,14 +58,14 @@ public class LoginController {
     public String auth(Model model) {
         Iterable<Result<Item>> objects = simpleStorageService.getObjects();
         model.addAttribute("objects", objects);
-        return "auth-header";
+        return "auth";
     }
 
     @GetMapping("/auth")
     public String getAuth(Model model) {
         Iterable<Result<Item>> objects = simpleStorageService.getObjects();
         model.addAttribute("objects", objects);
-        return "auth-header";
+        return "auth";
     }
 
     @GetMapping("/signup")

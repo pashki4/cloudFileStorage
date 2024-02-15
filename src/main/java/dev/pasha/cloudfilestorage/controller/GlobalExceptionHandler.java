@@ -1,6 +1,7 @@
 package dev.pasha.cloudfilestorage.controller;
 
 
+import dev.pasha.cloudfilestorage.exception.GetUserObjectMinioServiceException;
 import dev.pasha.cloudfilestorage.exception.UserRegMinioServiceException;
 import dev.pasha.cloudfilestorage.model.User;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,6 +25,13 @@ public class GlobalExceptionHandler {
         ModelAndView modelAndView = new ModelAndView("signup-form");
         modelAndView.addObject("errorMessage", ex.getMessage());
         modelAndView.addObject("user", new User());
+        return modelAndView;
+    }
+
+    @ExceptionHandler(GetUserObjectMinioServiceException.class)
+    public ModelAndView getUserObjectException(GetUserObjectMinioServiceException ex) {
+        ModelAndView modelAndView = new ModelAndView("auth");
+        modelAndView.addObject("errorMessage", ex.getMessage());
         return modelAndView;
     }
 }
