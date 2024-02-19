@@ -1,6 +1,6 @@
 package dev.pasha.cloudfilestorage.controller;
 
-import dev.pasha.cloudfilestorage.exception.UserRegMinioServiceException;
+import dev.pasha.cloudfilestorage.exception.UserAuthMinioServiceException;
 import dev.pasha.cloudfilestorage.model.User;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
 import dev.pasha.cloudfilestorage.service.UserRegistrationService;
@@ -19,14 +19,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 @Controller
-@RequestMapping
 public class LoginController {
 
     private final UserRegistrationService userRegistrationService;
@@ -86,7 +84,7 @@ public class LoginController {
             session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
             return "redirect:/";
         } catch (Exception e) {
-            throw new UserRegMinioServiceException("Error registering user: " + user, e);
+            throw new UserAuthMinioServiceException("Error registering user: " + user, e);
         }
     }
 }

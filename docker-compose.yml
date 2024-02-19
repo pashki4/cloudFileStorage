@@ -13,18 +13,18 @@ services:
       - minio_data:/data
     command: server --console-address ":9001" /data
 
-  createbuckets:
-    image: minio/mc
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 minio 12341234;
-      /usr/bin/mc rm -r --force myminio/user-files;
-      /usr/bin/mc mb myminio/user-files;
-      /usr/bin/mc policy download myminio/user-files;
-      exit 0;
-      "
+#  createbuckets:
+#    image: minio/mc
+#    depends_on:
+#      - minio
+#    entrypoint: >
+#      /bin/sh -c "
+#      /usr/bin/mc config host add myminio http://minio:9000 minio 12341234;
+#      /usr/bin/mc rm -r --force myminio/user-files;
+#      /usr/bin/mc mb myminio/user-files;
+#      /usr/bin/mc policy download myminio/user-files;
+#      exit 0;
+#      "
   mysql:
     image: 'mysql:8.2'
     restart: always

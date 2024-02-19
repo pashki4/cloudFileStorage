@@ -14,11 +14,11 @@
 </head>
 <body>
 <div sec:authorize="isAuthenticated()">
-    <div th:insert="auth :: header"></div>
-    <div th:insert="auth :: content"></div>
+    <div th:insert="~{fragments/auth :: header}"></div>
+    <div th:insert="~{fragments/auth :: content}"></div>
 </div>
 <div sec:authorize="isAnonymous()">
-    <div th:insert="not-auth :: header"></div>
+    <div th:insert="~{fragments/not-auth :: header}"></div>
 </div>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>

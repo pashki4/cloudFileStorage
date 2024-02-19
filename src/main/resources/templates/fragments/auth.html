@@ -16,7 +16,7 @@
 <div th:fragment="header">
     <nav class="navbar navbar-static-top navbar-light bg-body-tertiary mb-5">
         <div class="container-fluid ms-4">
-            <a class="navbar-brand" href="#">Icon</a>
+            <a class="navbar-brand" href="/">Icon</a>
 
             <!-- Search -->
             <form class="d-flex input-group w-auto" method="get" action="#">
@@ -42,10 +42,33 @@
 </div>
 
 <div th:fragment="content">
-    <div th:if="${not #lists.isEmpty(objects)}">
-        <p th:each="object : ${objects}" th:text="${object.get().objectName()}">Object</p>
+    <div class="container">
+        <div class="row">
+            <tr th:each="object : ${objects}">
+                <div class="col-md-3">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex gap-3">
+                                <div class="object-image">
+                                    <i class="bi bi-folder text-warning fs-1" th:if="${object.get().isDir()}"></i>
+                                    <i class="bi bi-file-earmark text-info fs-1" th:unless="${object.get().isDir()}"></i>
+                                </div>
+                                <div class="object-info">
+                                    <h5 th:text="${object.get().objectName()}">Object name</h5>
+                                    <form method="post" action="#">
+                                        <button class="btn btn-primary">Enter in</button>
+                                        <button class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </tr>
+        </div>
     </div>
 </div>
+
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>

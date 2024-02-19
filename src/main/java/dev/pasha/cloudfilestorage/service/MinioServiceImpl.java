@@ -2,56 +2,35 @@ package dev.pasha.cloudfilestorage.service;
 
 import dev.pasha.cloudfilestorage.model.CustomUserDetails;
 import dev.pasha.cloudfilestorage.model.User;
-import io.minio.ListObjectsArgs;
-import io.minio.MinioClient;
-import io.minio.Result;
-import io.minio.UploadObjectArgs;
+import io.minio.*;
 import io.minio.admin.MinioAdminClient;
 import io.minio.admin.UserInfo;
 import io.minio.messages.Item;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class MinioServiceImpl implements SimpleStorageService {
 
     private static final String BUCKET_NAME = "user-files";
-    private static final String USER_PREFIX_PATTERN = "user-%d-files";
+    private static final String USER_BUCKET_NAME = "user-%d-files";
 
     @Override
     public Iterable<Result<Item>> getObjects() {
-        MinioClient client = getClient();
-        Iterable<Result<Item>> iterable = client.listObjects(ListObjectsArgs.builder()
+        MinioClient client = getUserClient();
+        return client.listObjects(ListObjectsArgs.builder()
                 .delimiter("/")
-                .recursive(true)
                 .bucket(BUCKET_NAME)
+                .prefix(String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()))
                 .build());
-        return filterUserDate(iterable);
     }
-
-    @NotNull
-    private static List<Result<Item>> filterUserDate(Iterable<Result<Item>> iterable) {
-        return StreamSupport.stream(iterable.spliterator(), false)
-                .filter(result -> {
-                    try {
-                        return result.get().objectName().startsWith(String.format(USER_PREFIX_PATTERN, getUserDetails().getId()));
-                    } catch (Exception e) {
-                        return false;
-                    }
-                })
-                .collect(Collectors.toList());
-    }
-
 
     @Override
     public void uploadObject(String fileUrl) throws Exception {
-        MinioClient client = getClient();
+        MinioClient client = getUserClient();
         client.uploadObject(UploadObjectArgs.builder()
                 .bucket(BUCKET_NAME)
                 .object("current_position + file_name")
@@ -71,11 +50,30 @@ public class MinioServiceImpl implements SimpleStorageService {
 
     @Override
     public void register(User user) throws Exception {
-        MinioAdminClient adminClient = getAdminClient();
-        addNewReadWriteUser(adminClient, user);
+        createCommonBucketIfNotExists();
+        createNewUser(user);
     }
 
-    private void addNewReadWriteUser(MinioAdminClient adminClient, User user) throws Exception {
+    private void createNewUser(User user) throws Exception {
+        addNewReadWriteUser(user);
+    }
+
+    private void createCommonBucketIfNotExists() throws Exception {
+        MinioClient client = MinioClient.builder()
+                .credentials("minio", "12341234")
+                .endpoint("localhost", 9000, false)
+                .build();
+        if (!client.bucketExists(BucketExistsArgs.builder()
+                .bucket("user-files")
+                .build())) {
+            client.makeBucket(MakeBucketArgs.builder()
+                    .bucket(BUCKET_NAME)
+                    .build());
+        }
+    }
+
+    private void addNewReadWriteUser(User user) throws Exception {
+        MinioAdminClient adminClient = getAdminClient();
         adminClient.addUser(user.getUsername(), UserInfo.Status.ENABLED, user.getPassword(),
                 "readwrite", List.of("my-group"));
         adminClient.setPolicy(user.getUsername(), false, "readwrite");
@@ -88,7 +86,7 @@ public class MinioServiceImpl implements SimpleStorageService {
                 .build();
     }
 
-    private MinioClient getClient() {
+    private MinioClient getUserClient() {
         UserDetails userDetails = getUserDetails();
         return MinioClient.builder()
                 .endpoint("localhost", 9000, false)

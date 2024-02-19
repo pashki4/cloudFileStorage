@@ -7,10 +7,10 @@
 <body>
 
 <div th:fragment="header">
-    <nav class="navbar navbar-static-top navbar-light fixed-top bg-body-tertiary">
+    <nav class="navbar navbar-static-top navbar-light bg-body-tertiary mb-5">
         <div class="container-fluid ms-4">
-            <a class="navbar-brand" th:href="@{/}"><img src="/images/icon.jpg" alt="icon"
-                                                        class="img-thumbnail icon"></a>
+            <a class="navbar-brand" href="/"><img src="/images/icon.jpg" alt="icon"
+                                                              class="img-thumbnail icon"></a>
 
             <!-- Image -->
             <img src="/images/start.jpg" class="img-thumbnail image me-2" alt="image"/>
@@ -28,5 +28,7 @@
         </div>
     </nav>
 </div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>
