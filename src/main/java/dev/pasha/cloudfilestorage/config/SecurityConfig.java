@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .successForwardUrl("/auth")
+                        .successForwardUrl("/")
                         .permitAll()
                 )
                 .logout(logout -> logout

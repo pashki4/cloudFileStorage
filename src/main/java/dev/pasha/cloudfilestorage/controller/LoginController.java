@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.security.Principal;
+
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 @Controller
@@ -29,7 +31,6 @@ public class LoginController {
 
     private final UserRegistrationService userRegistrationService;
     private final SimpleStorageService simpleStorageService;
-
     private final AuthenticationManager authenticationManager;
 
     @Autowired
@@ -39,33 +40,25 @@ public class LoginController {
         this.authenticationManager = authenticationManager;
     }
 
-    @GetMapping("/")
-    public String defaultPage() {
+    @PostMapping("/")
+    public String auth(Model model) {
+        Iterable<Result<Item>> objects = simpleStorageService.getObjects();
+        model.addAttribute("objects", objects);
         return "index";
     }
 
-    @PostMapping("/")
-    public String defaultPagePost() {
+    @GetMapping("/")
+    public String getAuth(Principal principal, Model model) {
+        if (principal != null) {
+            Iterable<Result<Item>> objects = simpleStorageService.getObjects();
+            model.addAttribute("objects", objects);
+        }
         return "index";
     }
 
     @GetMapping("/login")
     public String getLoginForm() {
         return "login-form";
-    }
-
-    @PostMapping("/auth")
-    public String auth(Model model) {
-        Iterable<Result<Item>> objects = simpleStorageService.getObjects();
-        model.addAttribute("objects", objects);
-        return "auth";
-    }
-
-    @GetMapping("/auth")
-    public String getAuth(Model model) {
-        Iterable<Result<Item>> objects = simpleStorageService.getObjects();
-        model.addAttribute("objects", objects);
-        return "auth";
     }
 
     @GetMapping("/signup")
@@ -91,7 +84,7 @@ public class LoginController {
 
             HttpSession session = request.getSession(true);
             session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
-            return "redirect:/auth";
+            return "redirect:/";
         } catch (Exception e) {
             throw new UserRegMinioServiceException("Error registering user: " + user, e);
         }
