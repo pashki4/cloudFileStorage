@@ -8,12 +8,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MinioService {
 
     public static void main(String[] args) {
+
     }
 
     private static void listObjects(MinioClient client) {

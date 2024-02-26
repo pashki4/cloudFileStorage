@@ -6,7 +6,7 @@ import io.minio.messages.Item;
 
 public interface SimpleStorageService {
 
-    Iterable<Result<Item>> getObjects();
+    Iterable<Result<Item>> getObjectsByPath(String path);
 
     void uploadObject(String fileUrl) throws Exception;
 

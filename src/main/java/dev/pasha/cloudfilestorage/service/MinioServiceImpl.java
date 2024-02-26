@@ -19,13 +19,28 @@ public class MinioServiceImpl implements SimpleStorageService {
     private static final String USER_BUCKET_NAME = "user-%d-files";
 
     @Override
-    public Iterable<Result<Item>> getObjects() {
+    public Iterable<Result<Item>> getObjectsByPath(String path) {
         MinioClient client = getUserClient();
+        return getObjects(path, client);
+    }
+
+    private static Iterable<Result<Item>> getObjects(String path, MinioClient client) {
+        String validatedPath = validatePath(path);
         return client.listObjects(ListObjectsArgs.builder()
                 .delimiter("/")
                 .bucket(BUCKET_NAME)
-                .prefix(String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()))
+                .prefix(validatedPath)
+                .recursive(false)
                 .build());
+    }
+
+    private static String validatePath(String path) {
+        if (path == null) {
+            return String.format(USER_BUCKET_NAME + "/", getUserDetails().getId());
+        } else if (!path.endsWith("/")) {
+            return path + "/";
+        }
+        return path;
     }
 
     @Override

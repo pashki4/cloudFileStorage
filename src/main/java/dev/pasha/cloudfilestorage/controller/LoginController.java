@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 
@@ -38,17 +39,18 @@ public class LoginController {
         this.authenticationManager = authenticationManager;
     }
 
-    @PostMapping("/")
-    public String auth(Model model) {
-        Iterable<Result<Item>> objects = simpleStorageService.getObjects();
-        model.addAttribute("objects", objects);
-        return "index";
-    }
+//    @PostMapping("/")
+//    public String auth(Model model) {
+//        Iterable<Result<Item>> objects = simpleStorageService.getObjectsByPath("");
+//        model.addAttribute("objects", objects);
+//        return "index";
+//    }
 
     @GetMapping("/")
-    public String getAuth(Principal principal, Model model) {
+    public String getIndex(@RequestParam(value = "path", required = false) String path, Principal principal, Model model) throws Exception {
         if (principal != null) {
-            Iterable<Result<Item>> objects = simpleStorageService.getObjects();
+            Iterable<Result<Item>> objects = simpleStorageService.getObjectsByPath(path);
+            BreadCrumbs breadCrumbs = createBreadCrumbs(objects);
             model.addAttribute("objects", objects);
         }
         return "index";

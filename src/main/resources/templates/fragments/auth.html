@@ -51,14 +51,30 @@
                             <div class="d-flex gap-3">
                                 <div class="object-image">
                                     <i class="bi bi-folder text-warning fs-1" th:if="${object.get().isDir()}"></i>
-                                    <i class="bi bi-file-earmark text-info fs-1" th:unless="${object.get().isDir()}"></i>
+                                    <i class="bi bi-file-earmark text-info fs-1"
+                                       th:unless="${object.get().isDir()}"></i>
                                 </div>
                                 <div class="object-info">
                                     <h5 th:text="${object.get().objectName()}">Object name</h5>
-                                    <form method="post" action="#">
-                                        <button class="btn btn-primary">Enter in</button>
-                                        <button class="btn btn-danger">Delete</button>
-                                    </form>
+                                    <div th:if="${object.get().isDir()}">
+                                        <form method="post">
+                                            <button class="btn btn-primary">Open</button>
+                                        </form>
+                                    </div>
+                                    <div th:unless="${object.get().isDir()}">
+                                        <div class="row">
+                                            <div class="col">
+                                                <form class="form" method="post" action="#">
+                                                    <button class="btn btn-primary">Rename</button>
+                                                </form>
+                                            </div>
+                                            <div class="col">
+                                                <form class="form" method="post" action="#">
+                                                    <button class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -68,6 +84,19 @@
         </div>
     </div>
 </div>
+
+<!--<div th:content="breadscrumb">-->
+<!--    <nav aria-label="breadcrumb">-->
+<!--        <ol class="breadcrumb">-->
+<!--            <li th:each="path : ${breadcrumbs}">-->
+<!--                <a class="breadcrumb-item" th:href="${path.getValue()}"></a>-->
+<!--            </li>-->
+<!--            <li class="breadcrumb-item"><a href="#">Home</a></li>-->
+<!--            <li class="breadcrumb-item"><a href="#">Library</a></li>-->
+<!--            <li class="breadcrumb-item active" aria-current="page">Data</li>-->
+<!--        </ol>-->
+<!--    </nav>-->
+<!--</div>-->
 
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
