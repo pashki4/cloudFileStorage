@@ -8,10 +8,19 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class MinioService {
 
     public static void main(String[] args) {
+        Map<String, String> map = new HashMap<>();
+        Set<Map.Entry<String, String>> entries = map.entrySet();
+        for(Map.Entry<String, String> entry : entries) {
+            entry.getKey();
+            entry.getValue();
+        }
 
     }
 

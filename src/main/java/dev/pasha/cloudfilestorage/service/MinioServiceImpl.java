@@ -10,7 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MinioServiceImpl implements SimpleStorageService {
@@ -35,12 +37,13 @@ public class MinioServiceImpl implements SimpleStorageService {
     }
 
     private static String validatePath(String path) {
+        String root = String.format(USER_BUCKET_NAME + "/", getUserDetails().getId());
         if (path == null) {
-            return String.format(USER_BUCKET_NAME + "/", getUserDetails().getId());
+            return root;
         } else if (!path.endsWith("/")) {
-            return path + "/";
+            return root + path + "/";
         }
-        return path;
+        return root + path;
     }
 
     @Override
@@ -71,6 +74,26 @@ public class MinioServiceImpl implements SimpleStorageService {
 
     private void createNewUser(User user) throws Exception {
         addNewReadWriteUser(user);
+    }
+
+    @Override
+    public Map<String, String> createBreadCrumb(String path) {
+        Map<String, String> result = new LinkedHashMap<>();
+        if (path == null) {
+            return result;
+        }
+        String[] split = path.split("/");
+        for (int i = 0; i < split.length; i++) {
+            String currentLastElement = split[i];
+            StringBuilder sb = new StringBuilder();
+            for (int j = 0; j < i; j++) {
+                sb.append(split[j]).append("/");
+            }
+            sb.append(currentLastElement).append("/");
+            result.put(currentLastElement, sb.toString());
+        }
+        return result;
+
     }
 
     private void createCommonBucketIfNotExists() throws Exception {

@@ -57,19 +57,19 @@
                                 <div class="object-info">
                                     <h5 th:text="${object.get().objectName()}">Object name</h5>
                                     <div th:if="${object.get().isDir()}">
-                                        <form method="post">
+                                        <form method="get" th:action="@{/(path=${object.get().objectName()})}">
                                             <button class="btn btn-primary">Open</button>
                                         </form>
                                     </div>
                                     <div th:unless="${object.get().isDir()}">
                                         <div class="row">
                                             <div class="col">
-                                                <form class="form" method="post" action="#">
+                                                <form class="form" method="get" action="#">
                                                     <button class="btn btn-primary">Rename</button>
                                                 </form>
                                             </div>
                                             <div class="col">
-                                                <form class="form" method="post" action="#">
+                                                <form class="form" method="get" action="#">
                                                     <button class="btn btn-danger">Delete</button>
                                                 </form>
                                             </div>
@@ -84,20 +84,22 @@
         </div>
     </div>
 </div>
-
-<!--<div th:content="breadscrumb">-->
-<!--    <nav aria-label="breadcrumb">-->
-<!--        <ol class="breadcrumb">-->
-<!--            <li th:each="path : ${breadcrumbs}">-->
-<!--                <a class="breadcrumb-item" th:href="${path.getValue()}"></a>-->
-<!--            </li>-->
-<!--            <li class="breadcrumb-item"><a href="#">Home</a></li>-->
-<!--            <li class="breadcrumb-item"><a href="#">Library</a></li>-->
-<!--            <li class="breadcrumb-item active" aria-current="page">Data</li>-->
-<!--        </ol>-->
-<!--    </nav>-->
-<!--</div>-->
-
+<div th:fragment="breadcrumb">
+    <div class="container">
+        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item" >
+                    <a href="/">Home</a>
+                </li>
+                <th:block th:each="entry : ${breadCrumb.entrySet()}">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/(path=${entry.getValue()})}" th:text="${entry.getKey()}"></a>
+                    </li>
+                </th:block>
+            </ol>
+        </nav>
+    </div>
+</div>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>

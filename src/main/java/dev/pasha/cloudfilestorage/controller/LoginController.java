@@ -22,6 +22,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.StreamSupport;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
@@ -39,19 +44,13 @@ public class LoginController {
         this.authenticationManager = authenticationManager;
     }
 
-//    @PostMapping("/")
-//    public String auth(Model model) {
-//        Iterable<Result<Item>> objects = simpleStorageService.getObjectsByPath("");
-//        model.addAttribute("objects", objects);
-//        return "index";
-//    }
-
     @GetMapping("/")
     public String getIndex(@RequestParam(value = "path", required = false) String path, Principal principal, Model model) throws Exception {
         if (principal != null) {
             Iterable<Result<Item>> objects = simpleStorageService.getObjectsByPath(path);
-            BreadCrumbs breadCrumbs = createBreadCrumbs(objects);
+            Map<String, String> breadCrumb = simpleStorageService.createBreadCrumb(path);
             model.addAttribute("objects", objects);
+            model.addAttribute("breadCrumb", breadCrumb);
         }
         return "index";
     }

@@ -4,6 +4,8 @@ import dev.pasha.cloudfilestorage.model.User;
 import io.minio.Result;
 import io.minio.messages.Item;
 
+import java.util.Map;
+
 public interface SimpleStorageService {
 
     Iterable<Result<Item>> getObjectsByPath(String path);
@@ -16,4 +18,5 @@ public interface SimpleStorageService {
 
     void register(User user) throws Exception;
 
+    Map<String, String> createBreadCrumb(String path);
 }
