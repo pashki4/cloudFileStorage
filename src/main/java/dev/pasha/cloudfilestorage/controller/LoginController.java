@@ -22,11 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.StreamSupport;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
@@ -45,7 +41,7 @@ public class LoginController {
     }
 
     @GetMapping("/")
-    public String getIndex(@RequestParam(value = "path", required = false) String path, Principal principal, Model model) throws Exception {
+    public String getIndex(@RequestParam(value = "path", required = false) String path, Principal principal, Model model) {
         if (principal != null) {
             Iterable<Result<Item>> objects = simpleStorageService.getObjectsByPath(path);
             Map<String, String> breadCrumb = simpleStorageService.createBreadCrumb(path);

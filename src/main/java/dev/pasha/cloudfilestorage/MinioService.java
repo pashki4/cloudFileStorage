@@ -17,7 +17,7 @@ public class MinioService {
     public static void main(String[] args) {
         Map<String, String> map = new HashMap<>();
         Set<Map.Entry<String, String>> entries = map.entrySet();
-        for(Map.Entry<String, String> entry : entries) {
+        for (Map.Entry<String, String> entry : entries) {
             entry.getKey();
             entry.getValue();
         }
