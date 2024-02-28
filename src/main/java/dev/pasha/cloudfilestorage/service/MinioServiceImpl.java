@@ -1,6 +1,7 @@
 package dev.pasha.cloudfilestorage.service;
 
 import dev.pasha.cloudfilestorage.model.CustomUserDetails;
+import dev.pasha.cloudfilestorage.model.MinioItemWrapper;
 import dev.pasha.cloudfilestorage.model.User;
 import io.minio.*;
 import io.minio.admin.MinioAdminClient;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 @Service
 public class MinioServiceImpl implements SimpleStorageService {
@@ -21,19 +23,29 @@ public class MinioServiceImpl implements SimpleStorageService {
     private static final String USER_BUCKET_NAME = "user-%d-files";
 
     @Override
-    public Iterable<Result<Item>> getObjectsByPath(String path) {
+    public List<MinioItemWrapper> getObjectsByPath(String path) {
         MinioClient client = getUserClient();
         return getObjects(path, client);
     }
 
-    private static Iterable<Result<Item>> getObjects(String path, MinioClient client) {
+    private static List<MinioItemWrapper> getObjects(String path, MinioClient client) {
         String validatedPath = validatePath(path);
-        return client.listObjects(ListObjectsArgs.builder()
+        Iterable<Result<Item>> objects = client.listObjects(ListObjectsArgs.builder()
                 .delimiter("/")
                 .bucket(BUCKET_NAME)
                 .prefix(validatedPath)
                 .recursive(false)
                 .build());
+        return StreamSupport.stream(objects.spliterator(), false)
+                .map(result -> {
+                    try {
+                        return result.get();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .map(MinioItemWrapper::new)
+                .toList();
     }
 
     private static String validatePath(String path) {

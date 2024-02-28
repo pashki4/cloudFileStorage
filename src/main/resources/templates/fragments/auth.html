@@ -44,24 +44,22 @@
 <div th:fragment="content">
     <div class="container">
         <div class="row">
-            <tr th:each="object : ${objects}">
+            <tr th:each="wrapper : ${items}">
                 <div class="col-md-3">
                     <div class="card mb-3">
                         <div class="card-body">
                             <div class="d-flex gap-3">
                                 <div class="object-image">
-                                    <i class="bi bi-folder text-warning fs-1" th:if="${object.get().isDir()}"></i>
+                                    <i class="bi bi-folder text-warning fs-1" th:if="${wrapper.getItem().isDir()}"></i>
                                     <i class="bi bi-file-earmark text-info fs-1"
-                                       th:unless="${object.get().isDir()}"></i>
+                                       th:unless="${wrapper.getItem().isDir()}"></i>
                                 </div>
                                 <div class="object-info">
-                                    <h5 th:text="${object.get().objectName()}">Object name</h5>
-                                    <div th:if="${object.get().isDir()}">
-                                        <form method="get" th:action="@{/(path=${object.get().objectName()})}">
-                                            <button class="btn btn-primary">Open</button>
-                                        </form>
+                                    <h5 th:text="${wrapper.getExtractedName()}">Object name</h5>
+                                    <div th:if="${wrapper.getItem().isDir()}">
+                                        <a class="btn btn-primary" th:href="@{/(path=${wrapper.getUrl()})}">Open</a>
                                     </div>
-                                    <div th:unless="${object.get().isDir()}">
+                                    <div th:unless="${wrapper.getItem().isDir()}">
                                         <div class="row">
                                             <div class="col">
                                                 <form class="form" method="get" action="#">
@@ -88,7 +86,7 @@
     <div class="container">
         <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item" >
+                <li class="breadcrumb-item">
                     <a href="/">Home</a>
                 </li>
                 <th:block th:each="entry : ${breadCrumb.entrySet()}">

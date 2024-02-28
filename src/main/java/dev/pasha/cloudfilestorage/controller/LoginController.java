@@ -1,11 +1,10 @@
 package dev.pasha.cloudfilestorage.controller;
 
 import dev.pasha.cloudfilestorage.exception.UserAuthMinioServiceException;
+import dev.pasha.cloudfilestorage.model.MinioItemWrapper;
 import dev.pasha.cloudfilestorage.model.User;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
 import dev.pasha.cloudfilestorage.service.UserRegistrationService;
-import io.minio.Result;
-import io.minio.messages.Item;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
@@ -43,9 +43,9 @@ public class LoginController {
     @GetMapping("/")
     public String getIndex(@RequestParam(value = "path", required = false) String path, Principal principal, Model model) {
         if (principal != null) {
-            Iterable<Result<Item>> objects = simpleStorageService.getObjectsByPath(path);
+            List<MinioItemWrapper> items = simpleStorageService.getObjectsByPath(path);
             Map<String, String> breadCrumb = simpleStorageService.createBreadCrumb(path);
-            model.addAttribute("objects", objects);
+            model.addAttribute("items", items);
             model.addAttribute("breadCrumb", breadCrumb);
         }
         return "index";
