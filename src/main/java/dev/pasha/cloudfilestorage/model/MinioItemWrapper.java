@@ -23,7 +23,7 @@ public class MinioItemWrapper {
         return split[split.length - 1];
     }
 
-    public String getExtractedName() {
+    public String getName() {
         return extractedName;
     }
 

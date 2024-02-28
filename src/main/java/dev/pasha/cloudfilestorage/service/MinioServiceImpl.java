@@ -1,5 +1,7 @@
 package dev.pasha.cloudfilestorage.service;
 
+import dev.pasha.cloudfilestorage.exception.DeleteMinioObjectException;
+import dev.pasha.cloudfilestorage.exception.RenameMinioObjectException;
 import dev.pasha.cloudfilestorage.model.CustomUserDetails;
 import dev.pasha.cloudfilestorage.model.MinioItemWrapper;
 import dev.pasha.cloudfilestorage.model.User;
@@ -69,13 +71,33 @@ public class MinioServiceImpl implements SimpleStorageService {
     }
 
     @Override
-    public void deleteObject() {
-
+    public void deleteObject(String name) {
+        MinioClient client = getUserClient();
+        try {
+            client.removeObject(RemoveObjectArgs.builder()
+                    .bucket(BUCKET_NAME)
+                    .object(String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + name)
+                    .build());
+        } catch (Exception e) {
+            throw new DeleteMinioObjectException("Error deleting object: " + name, e);
+        }
     }
 
     @Override
-    public void renameObject() {
-
+    public void renameObject(String oldName, String newName) {
+        MinioClient userClient = getUserClient();
+        try {
+            userClient.copyObject(CopyObjectArgs.builder()
+                    .bucket(BUCKET_NAME)
+                    .object(String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + newName)
+                    .source(CopySource.builder()
+                            .bucket(BUCKET_NAME)
+                            .object(String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + oldName)
+                            .build())
+                    .build());
+        } catch (Exception e) {
+            throw new RenameMinioObjectException("Error renaming object: " + oldName, e);
+        }
     }
 
     @Override

@@ -16,8 +16,8 @@
 <div th:fragment="header">
     <nav class="navbar navbar-static-top navbar-light bg-body-tertiary mb-5">
         <div class="container-fluid ms-4">
-            <a class="navbar-brand" href="/">Icon</a>
-
+            <a class="navbar-brand" href="/"><img src="/images/icon.jpg" alt="icon"
+                                                  class="img-thumbnail icon"></a>
             <!-- Search -->
             <form class="d-flex input-group w-auto" method="get" action="#">
                 <input
@@ -55,19 +55,44 @@
                                        th:unless="${wrapper.getItem().isDir()}"></i>
                                 </div>
                                 <div class="object-info">
-                                    <h5 th:text="${wrapper.getExtractedName()}">Object name</h5>
+                                    <h5 th:text="${wrapper.getName()}">Object name</h5>
                                     <div th:if="${wrapper.getItem().isDir()}">
                                         <a class="btn btn-primary" th:href="@{/(path=${wrapper.getUrl()})}">Open</a>
                                     </div>
                                     <div th:unless="${wrapper.getItem().isDir()}">
                                         <div class="row">
                                             <div class="col">
-                                                <form class="form" method="get" action="#">
-                                                    <button class="btn btn-primary">Rename</button>
-                                                </form>
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Rename</button>
+
+                                                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h1 class="modal-title fs-5" id="exampleModalLabel">Rename</h1>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form method="post" th:action="@{/rename}">
+                                                                    <div class="mb-3">
+                                                                        <label for="oldName" class="col-form-label">Old name:</label>
+                                                                        <input type="text" class="form-control" id="oldName" name="oldName"
+                                                                               th:placeholder="${wrapper.getName()}" th:value="${wrapper.getUrl()}">
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="newName" class="col-form-label">New name:</label>
+                                                                        <input class="form-control" id="newName" name="newName">
+                                                                    </div>
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                    <button type="submit" class="btn btn-primary">Ok</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="col">
-                                                <form class="form" method="get" action="#">
+                                                <form class="form" method="post"
+                                                      th:action="@{/delete(query=${wrapper.getUrl()})}">
                                                     <button class="btn btn-danger">Delete</button>
                                                 </form>
                                             </div>

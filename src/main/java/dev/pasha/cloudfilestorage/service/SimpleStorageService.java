@@ -12,9 +12,9 @@ public interface SimpleStorageService {
 
     void uploadObject(String fileUrl) throws Exception;
 
-    void deleteObject();
+    void deleteObject(String name);
 
-    void renameObject();
+    void renameObject(String oldName, String newName);
 
     void register(User user) throws Exception;
 

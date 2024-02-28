@@ -28,7 +28,6 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 
 @Controller
 public class LoginController {
-
     private final UserRegistrationService userRegistrationService;
     private final SimpleStorageService simpleStorageService;
     private final AuthenticationManager authenticationManager;
