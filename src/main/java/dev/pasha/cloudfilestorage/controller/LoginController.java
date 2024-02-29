@@ -2,6 +2,7 @@ package dev.pasha.cloudfilestorage.controller;
 
 import dev.pasha.cloudfilestorage.exception.UserAuthMinioServiceException;
 import dev.pasha.cloudfilestorage.model.MinioItemWrapper;
+import dev.pasha.cloudfilestorage.model.MinioObject;
 import dev.pasha.cloudfilestorage.model.User;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
 import dev.pasha.cloudfilestorage.service.UserRegistrationService;
@@ -40,7 +41,9 @@ public class LoginController {
     }
 
     @GetMapping("/")
-    public String getIndex(@RequestParam(value = "path", required = false) String path, Principal principal, Model model) {
+    public String getIndex(@RequestParam(value = "path", required = false) String path,
+                           Principal principal,
+                           Model model) {
         if (principal != null) {
             List<MinioItemWrapper> items = simpleStorageService.getObjectsByPath(path);
             Map<String, String> breadCrumb = simpleStorageService.createBreadCrumb(path);
@@ -66,7 +69,7 @@ public class LoginController {
         String pass = user.getPassword();
         try {
             userRegistrationService.register(user);
-            simpleStorageService.register(user);
+            simpleStorageService.createUser(user);
 
             UsernamePasswordAuthenticationToken authToken
                     = new UsernamePasswordAuthenticationToken(user.getUsername(), pass);

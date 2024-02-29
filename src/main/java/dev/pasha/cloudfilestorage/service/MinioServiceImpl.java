@@ -1,14 +1,15 @@
 package dev.pasha.cloudfilestorage.service;
 
-import dev.pasha.cloudfilestorage.exception.DeleteMinioObjectException;
-import dev.pasha.cloudfilestorage.exception.RenameMinioObjectException;
+import dev.pasha.cloudfilestorage.exception.*;
 import dev.pasha.cloudfilestorage.model.CustomUserDetails;
 import dev.pasha.cloudfilestorage.model.MinioItemWrapper;
+import dev.pasha.cloudfilestorage.model.MinioObject;
 import dev.pasha.cloudfilestorage.model.User;
 import io.minio.*;
 import io.minio.admin.MinioAdminClient;
 import io.minio.admin.UserInfo;
 import io.minio.messages.Item;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class MinioServiceImpl implements SimpleStorageService {
                     try {
                         return result.get();
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new GetMinioObjectException("Error loading objects by path: " + path, e);
                     }
                 })
                 .map(MinioItemWrapper::new)
@@ -61,13 +62,24 @@ public class MinioServiceImpl implements SimpleStorageService {
     }
 
     @Override
-    public void uploadObject(String fileUrl) throws Exception {
+    public void putObject(MinioObject object) {
+        String fullObjectName = getFullObjectName(object);
         MinioClient client = getUserClient();
-        client.uploadObject(UploadObjectArgs.builder()
-                .bucket(BUCKET_NAME)
-                .object("current_position + file_name")
-                .filename("")
-                .build());
+        try {
+            client.putObject(PutObjectArgs.builder()
+                    .bucket(BUCKET_NAME)
+                    .object(fullObjectName)
+                    .contentType(object.getFile().getContentType())
+                    .stream(object.getFile().getInputStream(), object.getFile().getSize(), -1)
+                    .build());
+        } catch (Exception e) {
+            throw new PutMinioObjectException("Error putting object: " + object.getFile().getOriginalFilename(), e);
+        }
+    }
+
+    @NotNull
+    private static String getFullObjectName(MinioObject object) {
+        return String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + object.getPath() + "/" + object.getFile().getOriginalFilename();
     }
 
     @Override
@@ -101,13 +113,17 @@ public class MinioServiceImpl implements SimpleStorageService {
     }
 
     @Override
-    public void register(User user) throws Exception {
+    public void createUser(User user) {
         createCommonBucketIfNotExists();
         createNewUser(user);
     }
 
-    private void createNewUser(User user) throws Exception {
-        addNewReadWriteUser(user);
+    private void createNewUser(User user) {
+        try {
+            addNewReadWriteUser(user);
+        } catch (Exception e) {
+            throw new CreateMinioUserException("Error creating user: " + user, e);
+        }
     }
 
     @Override
@@ -130,17 +146,21 @@ public class MinioServiceImpl implements SimpleStorageService {
 
     }
 
-    private void createCommonBucketIfNotExists() throws Exception {
+    private void createCommonBucketIfNotExists() {
         MinioClient client = MinioClient.builder()
                 .credentials("minio", "12341234")
                 .endpoint("localhost", 9000, false)
                 .build();
-        if (!client.bucketExists(BucketExistsArgs.builder()
-                .bucket("user-files")
-                .build())) {
-            client.makeBucket(MakeBucketArgs.builder()
-                    .bucket(BUCKET_NAME)
-                    .build());
+        try {
+            if (!client.bucketExists(BucketExistsArgs.builder()
+                    .bucket("user-files")
+                    .build())) {
+                client.makeBucket(MakeBucketArgs.builder()
+                        .bucket(BUCKET_NAME)
+                        .build());
+            }
+        } catch (Exception e) {
+            throw new CreateMinioBucketException("Error creating bucket: " + BUCKET_NAME, e);
         }
     }
 

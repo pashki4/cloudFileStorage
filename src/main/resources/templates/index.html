@@ -16,11 +16,15 @@
 <div sec:authorize="isAuthenticated()">
     <div th:insert="~{fragments/auth :: header}"></div>
     <div th:insert="~{fragments/auth :: content}"></div>
+    <div th:insert="~{fragments/auth :: upload}"></div>
     <div th:insert="~{fragments/auth :: breadcrumb}"></div>
 </div>
+
 <div sec:authorize="isAnonymous()">
     <div th:insert="~{fragments/not-auth :: header}"></div>
 </div>
+
+<script th:src="@{/js/main.js}"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>
