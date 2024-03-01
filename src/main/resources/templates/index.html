@@ -15,9 +15,14 @@
 <body>
 <div sec:authorize="isAuthenticated()">
     <div th:insert="~{fragments/auth :: header}"></div>
-    <div th:insert="~{fragments/auth :: content}"></div>
-    <div th:insert="~{fragments/auth :: upload}"></div>
-    <div th:insert="~{fragments/auth :: breadcrumb}"></div>
+    <div th:if="${searchResult == null}">
+        <div th:insert="~{fragments/auth :: content}"></div>
+        <div th:insert="~{fragments/auth :: upload}"></div>
+        <div th:insert="~{fragments/auth :: breadcrumb}"></div>
+    </div>
+    <div th:if="${searchResult}">
+        <div th:insert="~{fragments/auth :: searchContent}"></div>
+    </div>
 </div>
 
 <div sec:authorize="isAnonymous()">

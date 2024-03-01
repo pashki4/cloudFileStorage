@@ -46,7 +46,7 @@ public class S3OperationController {
     }
 
     @GetMapping("/search")
-    public String search(@RequestParam(value = "search-query", required = false) String searchQuery,
+    public String search(@RequestParam(value = "searchQuery", required = false) String searchQuery,
                          Model model) {
         List<MinioItemWrapper> searchResult = simpleStorageService.searchByObjectByQuery(searchQuery);
         model.addAttribute("searchResult", searchResult);

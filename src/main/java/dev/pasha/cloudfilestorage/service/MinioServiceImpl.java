@@ -37,6 +37,7 @@ public class MinioServiceImpl implements SimpleStorageService {
         Iterable<Result<Item>> objects = client.listObjects(ListObjectsArgs.builder()
                 .bucket(BUCKET_NAME)
                 .prefix(String.format(USER_BUCKET_NAME, getUserDetails().getId()))
+                .recursive(true)
                 .maxKeys(100)
                 .build());
         return StreamSupport.stream(objects.spliterator(), false)
