@@ -1,12 +1,17 @@
 package dev.pasha.cloudfilestorage.controller;
 
+import dev.pasha.cloudfilestorage.model.MinioItemWrapper;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Controller
 public class S3OperationController {
@@ -20,7 +25,8 @@ public class S3OperationController {
     @PostMapping("/delete")
     public String delete(@RequestParam(value = "query") String query) {
         simpleStorageService.deleteObject(query);
-        return "redirect:/";
+        String path = extractPath(query);
+        return "redirect:/?path=" + path;
     }
 
     @PostMapping("/rename")
@@ -28,14 +34,27 @@ public class S3OperationController {
                          @RequestParam("newName") String newName) {
         simpleStorageService.renameObject(oldName, newName);
         simpleStorageService.deleteObject(oldName);
-        return "redirect:/";
+        String path = extractPath(oldName);
+        return "redirect:/?path=" + path;
     }
 
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
-    public String upload(@RequestParam(value = "path", required = true) String path,
+    public String upload(@RequestParam(value = "path") String path,
                          @RequestParam("file") MultipartFile multipartFile) {
-        int i = 5;
         simpleStorageService.putObject(path, multipartFile);
         return "redirect:/?path=" + path;
+    }
+
+    @GetMapping("/search")
+    public String search(@RequestParam(value = "search-query", required = false) String searchQuery,
+                         Model model) {
+        List<MinioItemWrapper> searchResult = simpleStorageService.searchByObjectByQuery(searchQuery);
+        model.addAttribute("searchResult", searchResult);
+        return "index";
+    }
+
+    @NotNull
+    private static String extractPath(String query) {
+        return query.substring(0, query.lastIndexOf("/"));
     }
 }

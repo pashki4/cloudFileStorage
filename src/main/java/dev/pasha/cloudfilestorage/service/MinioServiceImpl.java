@@ -31,6 +31,27 @@ public class MinioServiceImpl implements SimpleStorageService {
         return getObjects(path, client);
     }
 
+    @Override
+    public List<MinioItemWrapper> searchByObjectByQuery(String query) {
+        MinioClient client = getUserClient();
+        Iterable<Result<Item>> objects = client.listObjects(ListObjectsArgs.builder()
+                .bucket(BUCKET_NAME)
+                .prefix(String.format(USER_BUCKET_NAME, getUserDetails().getId()))
+                .maxKeys(100)
+                .build());
+        return StreamSupport.stream(objects.spliterator(), false)
+                .map(result -> {
+                    try {
+                        return result.get();
+                    } catch (Exception e) {
+                        throw new GetMinioObjectException("Error search objects by query: " + query, e);
+                    }
+                })
+                .filter(item -> item.objectName().toLowerCase().contains(query.toLowerCase()))
+                .map(MinioItemWrapper::new)
+                .toList();
+    }
+
     private static List<MinioItemWrapper> getObjects(String path, MinioClient client) {
         String validatedPath = validatePath(path);
         Iterable<Result<Item>> objects = client.listObjects(ListObjectsArgs.builder()

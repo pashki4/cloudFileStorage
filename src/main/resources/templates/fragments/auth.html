@@ -83,7 +83,7 @@
                                                                     <div class="mb-3">
                                                                         <label for="oldName" class="col-form-label">Old
                                                                             name:</label>
-                                                                        <input type="text" class="form-control"
+                                                                        <input type="hidden" class="form-control"
                                                                                id="oldName" name="oldName"
                                                                                th:placeholder="${wrapper.getName()}"
                                                                                th:value="${wrapper.getUrl()}">
@@ -127,10 +127,12 @@
     <div class="container">
         <div class="input-group mb-3">
             <form class="form-control-lg" method="post" action="#" th:action="@{/upload}" enctype="multipart/form-data">
-                <input type="hidden" name="path" th:value="${param.path}">
-                <input type="file" name="file" class="form-control" id="inputGroupFile02">
-                <input type="reset" class="input">Reset</input>
-                <input type="submit" class="input-group">Upload</input>
+                <div class="input-group">
+                    <input type="file" name="file" class="form-control" id="inputGroupFile04"
+                           aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+                    <input type="hidden" name="path" th:value="${param.path}">
+                    <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
+                </div>
             </form>
         </div>
         <div class="drop-zone">
