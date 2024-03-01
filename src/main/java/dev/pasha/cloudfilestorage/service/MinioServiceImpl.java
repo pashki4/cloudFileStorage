@@ -3,7 +3,6 @@ package dev.pasha.cloudfilestorage.service;
 import dev.pasha.cloudfilestorage.exception.*;
 import dev.pasha.cloudfilestorage.model.CustomUserDetails;
 import dev.pasha.cloudfilestorage.model.MinioItemWrapper;
-import dev.pasha.cloudfilestorage.model.MinioObject;
 import dev.pasha.cloudfilestorage.model.User;
 import io.minio.*;
 import io.minio.admin.MinioAdminClient;
@@ -13,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,24 +62,24 @@ public class MinioServiceImpl implements SimpleStorageService {
     }
 
     @Override
-    public void putObject(MinioObject object) {
-        String fullObjectName = getFullObjectName(object);
+    public void putObject(String path, MultipartFile multiPartFile) {
+        String fullObjectName = getFullObjectName(path, multiPartFile);
         MinioClient client = getUserClient();
         try {
             client.putObject(PutObjectArgs.builder()
                     .bucket(BUCKET_NAME)
                     .object(fullObjectName)
-                    .contentType(object.getFile().getContentType())
-                    .stream(object.getFile().getInputStream(), object.getFile().getSize(), -1)
+                    .contentType(multiPartFile.getContentType())
+                    .stream(multiPartFile.getInputStream(), multiPartFile.getSize(), -1)
                     .build());
         } catch (Exception e) {
-            throw new PutMinioObjectException("Error putting object: " + object.getFile().getOriginalFilename(), e);
+            throw new PutMinioObjectException("Error putting object: " + multiPartFile.getOriginalFilename(), e);
         }
     }
 
     @NotNull
-    private static String getFullObjectName(MinioObject object) {
-        return String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + object.getPath() + "/" + object.getFile().getOriginalFilename();
+    private static String getFullObjectName(String path, MultipartFile multipartFile) {
+        return String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + path + "/" + multipartFile.getOriginalFilename();
     }
 
     @Override

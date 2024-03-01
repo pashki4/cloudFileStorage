@@ -1,17 +1,12 @@
 package dev.pasha.cloudfilestorage.controller;
 
-import dev.pasha.cloudfilestorage.model.MinioObject;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
-import org.apache.tomcat.util.codec.binary.Base64;
-import org.apache.tomcat.util.codec.binary.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @Controller
 public class S3OperationController {
@@ -37,8 +32,10 @@ public class S3OperationController {
     }
 
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
-    public String upload(@ModelAttribute MinioObject minioObject) {
-        simpleStorageService.putObject(minioObject);
-        return "redirect:/";
+    public String upload(@RequestParam(value = "path", required = true) String path,
+                         @RequestParam("file") MultipartFile multipartFile) {
+        int i = 5;
+        simpleStorageService.putObject(path, multipartFile);
+        return "redirect:/?path=" + path;
     }
 }

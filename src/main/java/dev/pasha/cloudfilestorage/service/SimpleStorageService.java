@@ -12,7 +12,7 @@ public interface SimpleStorageService {
 
     List<MinioItemWrapper> getObjectsByPath(String path);
 
-    void putObject(MinioObject object);
+    void putObject(String path, MultipartFile multipartFile);
 
     void deleteObject(String name);
 
