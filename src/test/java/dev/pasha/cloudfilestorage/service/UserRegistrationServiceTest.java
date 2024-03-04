@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -27,14 +27,15 @@ class UserRegistrationServiceTest {
 
     @Container
     @ServiceConnection
-    static MySQLContainer<?> container = new MySQLContainer<>("mysql:8.2");
+    static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres");
 
     @Test
     @Order(1)
     void userShouldBeRegistered() {
-        User newUser = new User("user", "pass");
-        userRegistrationService.register(newUser);
-        Optional<User> registeredUser = userRepository.findByUsername(newUser.getUsername());
+        String userName = "user";
+        User user = new User(userName, "pass");
+        userRegistrationService.register(user);
+        Optional<User> registeredUser = userRepository.findByUsername(user.getUsername());
         assertThat(registeredUser.isPresent()).isTrue();
     }
 

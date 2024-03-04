@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -23,15 +23,15 @@ class UserRepositoryTest {
 
     @Container
     @ServiceConnection
-    static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.2");
+    static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres");
 
     @Autowired
     UserRepository userRepository;
 
     @Test
     void connectionEstablished() {
-        assertThat(mySQLContainer.isCreated()).isTrue();
-        assertThat(mySQLContainer.isRunning()).isTrue();
+        assertThat(container.isCreated()).isTrue();
+        assertThat(container.isRunning()).isTrue();
     }
 
     @BeforeEach
