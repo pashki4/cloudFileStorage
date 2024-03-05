@@ -2,12 +2,12 @@ package dev.pasha.cloudfilestorage.model;
 
 import io.minio.messages.Item;
 
-public class MinioItemWrapper {
+public class ItemWrapper {
     private Item item;
     private String extractedName;
     private String url;
 
-    public MinioItemWrapper(Item item) {
+    public ItemWrapper(Item item) {
         this.item = item;
         this.extractedName = extractName(item);
         this.url = extractUrl(item);

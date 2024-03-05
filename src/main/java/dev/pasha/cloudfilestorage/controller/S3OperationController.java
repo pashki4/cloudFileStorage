@@ -1,6 +1,6 @@
 package dev.pasha.cloudfilestorage.controller;
 
-import dev.pasha.cloudfilestorage.model.MinioItemWrapper;
+import dev.pasha.cloudfilestorage.model.ItemWrapper;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class S3OperationController {
     }
 
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
-    public String upload(@RequestParam(value = "path") String path,
+    public String upload(@RequestParam(value = "path", required = false) String path,
                          @RequestParam("file") MultipartFile multipartFile) {
         simpleStorageService.putObject(path, multipartFile);
         return "redirect:/?path=" + path;
@@ -48,7 +48,7 @@ public class S3OperationController {
     @GetMapping("/search")
     public String search(@RequestParam(value = "searchQuery", required = false) String searchQuery,
                          Model model) {
-        List<MinioItemWrapper> searchResult = simpleStorageService.searchByObjectByQuery(searchQuery);
+        List<ItemWrapper> searchResult = simpleStorageService.searchObjectByQuery(searchQuery);
         model.addAttribute("searchResult", searchResult);
         return "index";
     }

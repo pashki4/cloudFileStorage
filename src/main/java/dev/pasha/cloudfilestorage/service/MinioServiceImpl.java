@@ -2,7 +2,7 @@ package dev.pasha.cloudfilestorage.service;
 
 import dev.pasha.cloudfilestorage.exception.*;
 import dev.pasha.cloudfilestorage.model.CustomUserDetails;
-import dev.pasha.cloudfilestorage.model.MinioItemWrapper;
+import dev.pasha.cloudfilestorage.model.ItemWrapper;
 import dev.pasha.cloudfilestorage.model.User;
 import io.minio.*;
 import io.minio.admin.MinioAdminClient;
@@ -26,13 +26,39 @@ public class MinioServiceImpl implements SimpleStorageService {
     private static final String USER_BUCKET_NAME = "user-%d-files";
 
     @Override
-    public List<MinioItemWrapper> getObjectsByPath(String path) {
+    public List<ItemWrapper> getObjectsByPath(String path) {
         MinioClient client = getUserClient();
-        return getObjects(path, client);
+        String validatedPath = validatePath(path);
+        Iterable<Result<Item>> objects = client.listObjects(ListObjectsArgs.builder()
+                .delimiter("/")
+                .bucket(BUCKET_NAME)
+                .prefix(validatedPath)
+                .recursive(false)
+                .build());
+        return StreamSupport.stream(objects.spliterator(), false)
+                .map(result -> {
+                    try {
+                        return result.get();
+                    } catch (Exception e) {
+                        throw new GetMinioObjectException("Error loading objects by path: " + path, e);
+                    }
+                })
+                .map(ItemWrapper::new)
+                .toList();
+    }
+
+    private static String validatePath(String path) {
+        String root = String.format(USER_BUCKET_NAME + "/", getUserDetails().getId());
+        if (path == null || path.isBlank()) {
+            return root;
+        } else if (!path.endsWith("/")) {
+            return root + path + "/";
+        }
+        return root + path;
     }
 
     @Override
-    public List<MinioItemWrapper> searchByObjectByQuery(String query) {
+    public List<ItemWrapper> searchObjectByQuery(String query) {
         MinioClient client = getUserClient();
         Iterable<Result<Item>> objects = client.listObjects(ListObjectsArgs.builder()
                 .bucket(BUCKET_NAME)
@@ -49,38 +75,8 @@ public class MinioServiceImpl implements SimpleStorageService {
                     }
                 })
                 .filter(item -> item.objectName().toLowerCase().contains(query.toLowerCase()))
-                .map(MinioItemWrapper::new)
+                .map(ItemWrapper::new)
                 .toList();
-    }
-
-    private static List<MinioItemWrapper> getObjects(String path, MinioClient client) {
-        String validatedPath = validatePath(path);
-        Iterable<Result<Item>> objects = client.listObjects(ListObjectsArgs.builder()
-                .delimiter("/")
-                .bucket(BUCKET_NAME)
-                .prefix(validatedPath)
-                .recursive(false)
-                .build());
-        return StreamSupport.stream(objects.spliterator(), false)
-                .map(result -> {
-                    try {
-                        return result.get();
-                    } catch (Exception e) {
-                        throw new GetMinioObjectException("Error loading objects by path: " + path, e);
-                    }
-                })
-                .map(MinioItemWrapper::new)
-                .toList();
-    }
-
-    private static String validatePath(String path) {
-        String root = String.format(USER_BUCKET_NAME + "/", getUserDetails().getId());
-        if (path == null) {
-            return root;
-        } else if (!path.endsWith("/")) {
-            return root + path + "/";
-        }
-        return root + path;
     }
 
     @Override
@@ -101,6 +97,7 @@ public class MinioServiceImpl implements SimpleStorageService {
 
     @NotNull
     private static String getFullObjectName(String path, MultipartFile multipartFile) {
+
         return String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + path + "/" + multipartFile.getOriginalFilename();
     }
 
@@ -142,7 +139,7 @@ public class MinioServiceImpl implements SimpleStorageService {
 
     private void createNewUser(User user) {
         try {
-            addNewReadWriteUser(user);
+            createUserWithReadWritePolicy(user);
         } catch (Exception e) {
             throw new CreateMinioUserException("Error creating user: " + user, e);
         }
@@ -151,7 +148,7 @@ public class MinioServiceImpl implements SimpleStorageService {
     @Override
     public Map<String, String> createBreadCrumb(String path) {
         Map<String, String> result = new LinkedHashMap<>();
-        if (path == null) {
+        if (path == null || path.isBlank()) {
             return result;
         }
         String[] split = path.split("/");
@@ -186,7 +183,7 @@ public class MinioServiceImpl implements SimpleStorageService {
         }
     }
 
-    private void addNewReadWriteUser(User user) throws Exception {
+    private void createUserWithReadWritePolicy(User user) throws Exception {
         MinioAdminClient adminClient = getAdminClient();
         adminClient.addUser(user.getUsername(), UserInfo.Status.ENABLED, user.getPassword(),
                 "readwrite", List.of("my-group"));
