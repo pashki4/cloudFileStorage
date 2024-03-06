@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   minio:
-    image: minio/minio
+    image: "minio/minio"
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -13,44 +13,22 @@ services:
       - minio_data:/data
     command: server --console-address ":9001" /data
 
-  #  createbuckets:
-  #    image: minio/mc
-  #    depends_on:
-  #      - minio
-  #    entrypoint: >
-  #      /bin/sh -c "
-  #      /usr/bin/mc config host add myminio http://minio:9000 minio 12341234;
-  #      /usr/bin/mc rm -r --force myminio/user-files;
-  #      /usr/bin/mc mb myminio/user-files;
-  #      /usr/bin/mc policy download myminio/user-files;
-  #      exit 0;
-  #      "
-
   postgres:
-    image: postgres
+    image: "postgres"
     restart: always
     environment:
       POSTGRES_DB: file_storage
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
-#      - ./src/main/resources/db-init/init.sql:/docker-entrypoint-initdb.d/init.sql
       - pg_data:/var/lib/postgresql/data
 
-#  mysql:
-#    image: 'mysql:8.2'
-#    restart: always
-#    environment:
-#      MYSQL_DATABASE: file_storage
-#      MYSQL_USER: mysql
-#      MYSQL_PASSWORD: 1234
-#      MYSQL_ROOT_PASSWORD: 1234
-#    ports:
-#      - '3306:3306'
-#    volumes:
-#      - db:/var/lib/mysql
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
 
 volumes:
   pg_data:
