@@ -1,6 +1,7 @@
 package dev.pasha.cloudfilestorage.service;
 
 
+import dev.pasha.cloudfilestorage.exception.DuplicateUserException;
 import dev.pasha.cloudfilestorage.model.User;
 import dev.pasha.cloudfilestorage.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class UserRegistrationService {
     }
 
     public void register(User user) {
+        if (userRepository.existsUserByUsername(user.getUsername())) {
+            throw new DuplicateUserException("username already taken");
+        }
         encodeUserPassword(user);
         userRepository.save(user);
     }

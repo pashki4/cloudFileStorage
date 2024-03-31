@@ -1,49 +1,60 @@
 package dev.pasha.cloudfilestorage.service;
 
+import dev.pasha.cloudfilestorage.exception.DuplicateUserException;
 import dev.pasha.cloudfilestorage.model.User;
 import dev.pasha.cloudfilestorage.repository.UserRepository;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.when;
 
-@Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(MockitoExtension.class)
 class UserRegistrationServiceTest {
 
-    @Autowired
-    UserRegistrationService userRegistrationService;
-    @Autowired
-    UserRepository userRepository;
+    @InjectMocks
+    private UserRegistrationService underTest;
 
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres");
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @Test
-    @Order(1)
     void userShouldBeRegistered() {
-        String userName = "user";
-        User user = new User(userName, "pass");
-        userRegistrationService.register(user);
-        Optional<User> registeredUser = userRepository.findByUsername(user.getUsername());
-        assertThat(registeredUser.isPresent()).isTrue();
+        //Given
+        String password = "password";
+        User user = new User("user", password);
+        String encodedPassword = "encoded-password";
+
+        //When
+        when(passwordEncoder.encode(user.getPassword())).thenReturn(encodedPassword);
+        underTest.register(user);
+
+        //Then
+        InOrder inOrder = inOrder(userRepository, passwordEncoder);
+        inOrder.verify(passwordEncoder).encode(password);
+        inOrder.verify(userRepository).save(user);
     }
 
     @Test
-    @Order(2)
     void sameUsernameShouldThrowException() {
-        User newUser = new User("user", "pass");
-        assertThatThrownBy(() -> userRegistrationService.register(newUser));
+        //Given
+        User user = new User("user", "password");
+
+        //When
+        when(userRepository.existsUserByUsername(user.getUsername())).thenReturn(true);
+
+        //Then
+        assertThatThrownBy(() -> underTest.register(user)).isInstanceOf(DuplicateUserException.class)
+                .hasMessage("username already taken");
     }
 
 }

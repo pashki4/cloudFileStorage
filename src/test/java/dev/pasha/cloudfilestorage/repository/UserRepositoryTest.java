@@ -1,20 +1,15 @@
 package dev.pasha.cloudfilestorage.repository;
 
 import dev.pasha.cloudfilestorage.model.User;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -63,7 +58,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void shouldReturnCountOfUsers() {
+    void shouldReturnUsers() {
         //Given
         User user = new User("user", "password");
         userRepository.save(user);
@@ -74,5 +69,29 @@ class UserRepositoryTest {
                 .findAny();
         //Then
         assertThat(actual).isPresent().hasValue(user);
+    }
+
+    @Test
+    void shouldReturnTrueWhenExistsUserByUsername() {
+        //Given
+        User user = new User("user", "password");
+        userRepository.save(user);
+
+        //When
+        boolean actual = userRepository.existsUserByUsername(user.getUsername());
+
+        //Then
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void shouldReturnFalseWhenExistsUserByUsername() {
+        //Given
+        String username = "user";
+        //When
+        boolean actual = userRepository.existsUserByUsername(username);
+
+        //Then
+        assertThat(actual).isFalse();
     }
 }
