@@ -2,7 +2,6 @@ package dev.pasha.cloudfilestorage.controller;
 
 import dev.pasha.cloudfilestorage.model.ItemWrapper;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,9 +24,7 @@ public class S3OperationController {
     @PostMapping("/delete")
     public String delete(@RequestParam(value = "query") String query) {
         simpleStorageService.deleteObject(query);
-//        String path = extractPath(query);
-        return "redirect:/";
-//        return "redirect:/?path=" + path;
+        return "redirect:/?path=" + getUrlFromQuery(query);
     }
 
     @PostMapping("/rename")
@@ -36,11 +33,14 @@ public class S3OperationController {
             simpleStorageService.renameObject(oldName, newName);
             simpleStorageService.deleteObject(oldName);
 
-        String path = "";
-        if (oldName.contains("/")) {
-            path = oldName.substring(0, oldName.lastIndexOf("/"));
+        return "redirect:/?path=" + getUrlFromQuery(oldName);
+    }
+
+    private static String getUrlFromQuery(String query) {
+        if (query.contains("/")) {
+            return query.substring(0, query.lastIndexOf("/"));
         }
-        return "redirect:/?path=" + path;
+        return "";
     }
 
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
