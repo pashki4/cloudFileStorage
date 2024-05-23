@@ -14,7 +14,7 @@ services:
     command: server --console-address ":9001" /data
 
   postgres:
-    image: "postgres"
+    image: postgres:16.2
     restart: always
     environment:
       POSTGRES_DB: file_storage
@@ -26,7 +26,7 @@ services:
       - pg_data:/var/lib/postgresql/data
 
   redis:
-    image: "redis:alpine"
+    image: redis:alpine
     ports:
       - "6379:6379"
 

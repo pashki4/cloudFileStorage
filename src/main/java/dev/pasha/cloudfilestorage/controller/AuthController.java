@@ -27,13 +27,15 @@ import java.util.Map;
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 @Controller
-public class LoginController {
+public class AuthController {
     private final UserRegistrationService userRegistrationService;
     private final SimpleStorageService simpleStorageService;
     private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public LoginController(UserRegistrationService userRegistrationService, SimpleStorageService simpleStorageService, AuthenticationManager authenticationManager) {
+    public AuthController(UserRegistrationService userRegistrationService,
+                          SimpleStorageService simpleStorageService,
+                          AuthenticationManager authenticationManager) {
         this.userRegistrationService = userRegistrationService;
         this.simpleStorageService = simpleStorageService;
         this.authenticationManager = authenticationManager;
@@ -66,13 +68,12 @@ public class LoginController {
 
     @PostMapping("/signup")
     public String signup(HttpServletRequest request, User user) {
-        String pass = user.getPassword();
         try {
             userRegistrationService.register(user);
             simpleStorageService.createUser(user);
 
             UsernamePasswordAuthenticationToken authToken
-                    = new UsernamePasswordAuthenticationToken(user.getUsername(), pass);
+                    = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
             authToken.setDetails(new WebAuthenticationDetails(request));
             Authentication authentication = authenticationManager.authenticate(authToken);
 

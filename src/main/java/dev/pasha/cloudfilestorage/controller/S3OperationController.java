@@ -26,7 +26,8 @@ public class S3OperationController {
     public String delete(@RequestParam(value = "query") String query) {
         simpleStorageService.deleteObject(query);
         String path = extractPath(query);
-        return "redirect:/?path=" + path;
+        return "redirect:/";
+//        return "redirect:/?path=" + path;
     }
 
     @PostMapping("/rename")
@@ -39,8 +40,10 @@ public class S3OperationController {
     }
 
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
-    public String upload(@RequestParam(value = "path", required = false) String path,
-                         @RequestParam("file") MultipartFile multipartFile) {
+    public String upload(
+            @RequestParam(value = "path", required = false) String path,
+            @RequestParam("file") MultipartFile multipartFile
+    ) {
         simpleStorageService.putObject(path, multipartFile);
         return "redirect:/?path=" + path;
     }

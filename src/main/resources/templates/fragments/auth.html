@@ -147,13 +147,15 @@
     <div class="container">
         <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="/">Home</a>
-                </li>
-                <th:block th:each="entry : ${breadCrumb.entrySet()}">
+                <th:block th:if="${breadCrumb != null}">
                     <li class="breadcrumb-item">
-                        <a th:href="@{/(path=${entry.getValue()})}" th:text="${entry.getKey()}"></a>
+                        <a href="/">Home</a>
                     </li>
+                    <th:block th:each="entry : ${breadCrumb.entrySet()}">
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/(path=${entry.getValue()})}" th:text="${entry.getKey()}"></a>
+                        </li>
+                    </th:block>
                 </th:block>
             </ol>
         </nav>
