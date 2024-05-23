@@ -33,18 +33,14 @@ public class S3OperationController {
     @PostMapping("/rename")
     public String rename(@RequestParam("oldName") String oldName,
                          @RequestParam("newName") String newName) {
-        try {
             simpleStorageService.renameObject(oldName, newName);
             simpleStorageService.deleteObject(oldName);
 
-            if (oldName.contains("/")) {
-                String path = oldName.substring(0, oldName.lastIndexOf("/"));
-                return "redirect:/?path=" + path;
-            }
-            return "redirect:/";
-        } catch (Exception e) {
-            throw new RuntimeException("exception while renaming file", e);
+        String path = "";
+        if (oldName.contains("/")) {
+            path = oldName.substring(0, oldName.lastIndexOf("/"));
         }
+        return "redirect:/?path=" + path;
     }
 
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})

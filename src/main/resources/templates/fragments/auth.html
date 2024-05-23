@@ -67,14 +67,14 @@
                                             <div class="col">
                                                 <button type="button" class="btn btn-primary"
                                                         th:data-bs-toggle="modal"
-                                                        th:attr="data-bs-target='#exampleModal'+${item.getId()}"
+                                                        th:attr="data-bs-target='#exampleModal' + ${item.getId()}"
                                                         data-bs-whatever="@getbootstrap">
                                                     Rename
                                                 </button>
                                             </div>
 
                                             <div class="modal fade"
-                                                 th:id="exampleModal+${item.getId()}"
+                                                 th:id="exampleModal + ${item.getId()}"
                                                  tabindex="-1"
                                                  aria-labelledby="exampleModalLabel"
                                                  aria-hidden="true">
@@ -90,11 +90,10 @@
                                                         <div class="modal-body">
                                                             <form method="post" th:action="@{/rename}">
                                                                 <div class="mb-3">
-                                                                    <label for="oldName" class="col-form-label">Old
-                                                                        name:</label>
                                                                     <input class="form-control"
                                                                            id="oldName"
                                                                            name="oldName"
+                                                                           type="hidden"
                                                                            th:placeholder="${item.getName()}"
                                                                            th:value="${item.getUrl()}"
                                                                            readonly
@@ -116,9 +115,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-
-
 
                                             <div class="col">
                                                 <form class="form" method="post"
