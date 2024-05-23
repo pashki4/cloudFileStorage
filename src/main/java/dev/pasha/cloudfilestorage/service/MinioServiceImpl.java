@@ -117,10 +117,12 @@ public class MinioServiceImpl implements SimpleStorageService {
     @Override
     public void renameObject(String oldName, String newName) {
         MinioClient userClient = getUserClient();
+        String fullPathNewName = createFullPathWithNewName(oldName, newName);
+        //TODO get full url from oldName and add it to newName -> redirect:/?path=url
         try {
             userClient.copyObject(CopyObjectArgs.builder()
                     .bucket(BUCKET_NAME)
-                    .object(String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + newName)
+                    .object(String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + fullPathNewName)
                     .source(CopySource.builder()
                             .bucket(BUCKET_NAME)
                             .object(String.format(USER_BUCKET_NAME + "/", getUserDetails().getId()) + oldName)
@@ -129,6 +131,15 @@ public class MinioServiceImpl implements SimpleStorageService {
         } catch (Exception e) {
             throw new RenameMinioObjectException("Error renaming object: " + oldName, e);
         }
+    }
+
+
+    private static String createFullPathWithNewName(String query, String newName) {
+        if (query.contains("/")) {
+            String url = query.substring(0, query.lastIndexOf("/"));
+            return url + "/" + newName;
+        }
+        return newName;
     }
 
     @Override

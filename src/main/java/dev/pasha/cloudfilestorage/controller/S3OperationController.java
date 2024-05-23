@@ -25,7 +25,7 @@ public class S3OperationController {
     @PostMapping("/delete")
     public String delete(@RequestParam(value = "query") String query) {
         simpleStorageService.deleteObject(query);
-        String path = extractPath(query);
+//        String path = extractPath(query);
         return "redirect:/";
 //        return "redirect:/?path=" + path;
     }
@@ -33,10 +33,18 @@ public class S3OperationController {
     @PostMapping("/rename")
     public String rename(@RequestParam("oldName") String oldName,
                          @RequestParam("newName") String newName) {
-        simpleStorageService.renameObject(oldName, newName);
-        simpleStorageService.deleteObject(oldName);
-        String path = extractPath(oldName);
-        return "redirect:/?path=" + path;
+        try {
+            simpleStorageService.renameObject(oldName, newName);
+            simpleStorageService.deleteObject(oldName);
+
+            if (oldName.contains("/")) {
+                String path = oldName.substring(0, oldName.lastIndexOf("/"));
+                return "redirect:/?path=" + path;
+            }
+            return "redirect:/";
+        } catch (Exception e) {
+            throw new RuntimeException("exception while renaming file", e);
+        }
     }
 
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
@@ -54,10 +62,5 @@ public class S3OperationController {
         List<ItemWrapper> searchResult = simpleStorageService.searchObjectByQuery(searchQuery);
         model.addAttribute("searchResult", searchResult);
         return "index";
-    }
-
-    @NotNull
-    private static String extractPath(String query) {
-        return query.substring(0, query.lastIndexOf("/"));
     }
 }
