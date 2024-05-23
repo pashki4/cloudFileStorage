@@ -27,6 +27,11 @@ public class S3OperationController {
         return "redirect:/?path=" + getUrlFromQuery(query);
     }
 
+    @PostMapping("/create")
+    public String create(@RequestParam(value = "createQuery") String createQuery) {
+        return "redirect:/?path=" + createQuery;
+    }
+
     @PostMapping("/rename")
     public String rename(@RequestParam("oldName") String oldName,
                          @RequestParam("newName") String newName) {
