@@ -28,8 +28,9 @@ public class S3OperationController {
     }
 
     @PostMapping("/create")
-    public String create(@RequestParam(value = "createQuery") String createQuery) {
-        return "redirect:/?path=" + createQuery;
+    public String create(@RequestParam("createQuery") String createQuery,
+                         @RequestParam("path") String path) {
+        return "redirect:/?path=" + path + createQuery;
     }
 
     @PostMapping("/rename")

@@ -231,8 +231,11 @@
                     <div class="modal-body">
                         <form method="post" th:action="@{/create}">
                             <div class="mb-3">
+                                <input type="hidden" class="form-control" id="path" name="path" th:value="${param.path}" readonly>
+                            </div>
+                            <div class="mb-3">
                                 <label for="createQuery" class="col-form-label">Folder name</label>
-                                <input class="form-control" id="createQuery" name="createQuery" th:value="${param.path}">
+                                <input class="form-control" id="createQuery" name="createQuery">
                             </div>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-primary">Create</button>

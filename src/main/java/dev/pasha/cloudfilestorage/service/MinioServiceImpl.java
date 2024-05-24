@@ -164,17 +164,15 @@ public class MinioServiceImpl implements SimpleStorageService {
             return result;
         }
         String[] split = path.split("/");
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < split.length - 1; i++) {
-            String currentElement = split[i];
+        for (int i = 0; i < split.length; i++) {
+            String currentLastElement = split[i];
+            StringBuilder sb = new StringBuilder();
             for (int j = 0; j < i; j++) {
-                sb.append(split[j].toLowerCase()).append("/");
+                sb.append(split[j]).append("/");
             }
-            sb.append(currentElement).append("/");
-            result.put(currentElement, sb.toString());
+            sb.append(currentLastElement).append("/");
+            result.put(currentLastElement, sb.toString());
         }
-        String lastElement = split[split.length - 1];
-        result.put(lastElement, sb.append(lastElement).toString());
         return result;
     }
 
