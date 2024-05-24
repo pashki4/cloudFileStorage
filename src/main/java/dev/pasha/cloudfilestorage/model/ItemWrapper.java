@@ -6,19 +6,20 @@ import java.util.UUID;
 
 public class ItemWrapper {
     private Item item;
-    private String extractedName;
+    private String name;
     private String url;
-
     private UUID id;
+    private String urlWithoutName;
 
     public ItemWrapper(Item item) {
         this.item = item;
-        this.extractedName = extractName(item);
-        this.url = extractUrl(item);
+        this.name = extractName(item);
+        this.url = deleteBucketName(item);
         this.id = UUID.randomUUID();
+        this.urlWithoutName = deleteNameFromUrl();
     }
 
-    private String extractUrl(Item item) {
+    private String deleteBucketName(Item item) {
         int indexOfSlash = item.objectName().indexOf("/");
         return item.objectName().substring(indexOfSlash + 1);
     }
@@ -28,8 +29,14 @@ public class ItemWrapper {
         return split[split.length - 1];
     }
 
+    private String deleteNameFromUrl() {
+        if (url.contains("/")) {
+            return url.substring(0, url.lastIndexOf("/"));
+        } return "";
+    }
+
     public String getName() {
-        return extractedName;
+        return name;
     }
 
     public UUID getId() {
@@ -42,5 +49,9 @@ public class ItemWrapper {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getUrlWithoutName() {
+        return urlWithoutName;
     }
 }

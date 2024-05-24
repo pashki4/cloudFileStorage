@@ -27,6 +27,7 @@
                         placeholder="Search"
                         aria-label="Search"
                         aria-describedby="search-addon"
+                        required
                 />
                 <button class="btn btn-primary" type="submit">
                     <i class="bi bi-search"></i>
@@ -189,13 +190,9 @@
                                 </div>
                                 <div class="object-info">
                                     <h5 th:text="${item.getName()}">Object name</h5>
-                                    <div th:if="${item.getItem().isDir()}">
-                                        <a class="btn btn-primary" th:href="@{/(path=${item.getUrl()})}">Open</a>
-                                    </div>
-                                    <div th:unless="${item.getItem().isDir()}">
                                         <div class="row">
                                             <div class="col">
-                                                <a class="btn btn-warning" th:href="@{/(path=${item.getUrl()})}">Open
+                                                <a class="btn btn-warning" th:href="@{/(path=${item.getUrlWithoutName()})}">Open
                                                     in folder</a>
                                             </div>
                                         </div>
@@ -208,7 +205,6 @@
             </tr>
         </div>
     </div>
-</div>
 
 <div th:fragment="createFolder">
     <div class="container">

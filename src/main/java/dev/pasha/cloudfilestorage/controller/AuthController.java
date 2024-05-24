@@ -71,20 +71,25 @@ public class AuthController {
         try {
             userRegistrationService.register(user);
             simpleStorageService.createUser(user);
-
-            UsernamePasswordAuthenticationToken authToken
-                    = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
-            authToken.setDetails(new WebAuthenticationDetails(request));
-            Authentication authentication = authenticationManager.authenticate(authToken);
-
-            SecurityContext sc = SecurityContextHolder.getContext();
-            sc.setAuthentication(authentication);
-
-            HttpSession session = request.getSession(true);
-            session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
-            return "redirect:/";
+            doAutoLogin(request, user);
+            return "index";
         } catch (Exception e) {
-            throw new UserAuthMinioServiceException("Error registering user: " + user, e);
+            SecurityContextHolder.getContext().setAuthentication(null);
+            throw new UserAuthMinioServiceException("Failure registering user: " + user, e);
         }
+    }
+
+    private void doAutoLogin(HttpServletRequest request, User user) {
+        UsernamePasswordAuthenticationToken authToken
+                = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+        authToken.setDetails(new WebAuthenticationDetails(request));
+
+        Authentication authentication = authenticationManager.authenticate(authToken);
+
+        SecurityContext sc = SecurityContextHolder.getContext();
+        sc.setAuthentication(authentication);
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
     }
 }

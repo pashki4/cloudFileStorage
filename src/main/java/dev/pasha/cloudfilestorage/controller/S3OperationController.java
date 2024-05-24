@@ -36,8 +36,8 @@ public class S3OperationController {
     @PostMapping("/rename")
     public String rename(@RequestParam("oldName") String oldName,
                          @RequestParam("newName") String newName) {
-            simpleStorageService.renameObject(oldName, newName);
-            simpleStorageService.deleteObject(oldName);
+        simpleStorageService.renameObject(oldName, newName);
+        simpleStorageService.deleteObject(oldName);
 
         return "redirect:/?path=" + getUrlFromQuery(oldName);
     }
@@ -59,8 +59,7 @@ public class S3OperationController {
     }
 
     @GetMapping("/search")
-    public String search(@RequestParam(value = "searchQuery", required = false) String searchQuery,
-                         Model model) {
+    public String search(@RequestParam(value = "searchQuery") String searchQuery, Model model) {
         List<ItemWrapper> searchResult = simpleStorageService.searchObjectByQuery(searchQuery);
         model.addAttribute("searchResult", searchResult);
         return "index";
