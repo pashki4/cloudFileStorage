@@ -5,15 +5,8 @@ import dev.pasha.cloudfilestorage.model.ItemWrapper;
 import dev.pasha.cloudfilestorage.model.User;
 import dev.pasha.cloudfilestorage.service.SimpleStorageService;
 import dev.pasha.cloudfilestorage.service.UserRegistrationService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,21 +17,16 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
-
 @Controller
 public class AuthController {
     private final UserRegistrationService userRegistrationService;
     private final SimpleStorageService simpleStorageService;
-    private final AuthenticationManager authenticationManager;
 
     @Autowired
     public AuthController(UserRegistrationService userRegistrationService,
-                          SimpleStorageService simpleStorageService,
-                          AuthenticationManager authenticationManager) {
+                          SimpleStorageService simpleStorageService) {
         this.userRegistrationService = userRegistrationService;
         this.simpleStorageService = simpleStorageService;
-        this.authenticationManager = authenticationManager;
     }
 
     @GetMapping("/")
@@ -67,29 +55,14 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public String signup(HttpServletRequest request, User user) {
+    public String signup(User user) {
         try {
             userRegistrationService.register(user);
             simpleStorageService.createUser(user);
-            doAutoLogin(request, user);
-            return "index";
+            return "redirect:/login";
         } catch (Exception e) {
             SecurityContextHolder.getContext().setAuthentication(null);
-            throw new UserAuthMinioServiceException("Failure registering user: " + user, e);
+            throw new UserAuthMinioServiceException("Failure registering user", e);
         }
-    }
-
-    private void doAutoLogin(HttpServletRequest request, User user) {
-        UsernamePasswordAuthenticationToken authToken
-                = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
-        authToken.setDetails(new WebAuthenticationDetails(request));
-
-        Authentication authentication = authenticationManager.authenticate(authToken);
-
-        SecurityContext sc = SecurityContextHolder.getContext();
-        sc.setAuthentication(authentication);
-
-        HttpSession session = request.getSession(true);
-        session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
     }
 }
