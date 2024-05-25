@@ -14,21 +14,22 @@
 </head>
 <body>
 <div sec:authorize="isAuthenticated()">
-    <div th:insert="~{fragments/auth :: header}"></div>
+    <div th:insert="~{fragments/auth/header :: header}"></div>
     <div th:if="${searchResult == null}">
-        <div th:insert="~{fragments/auth :: createFolder}"></div>
-        <div th:insert="~{fragments/auth :: content}"></div>
-        <div th:insert="~{fragments/auth :: upload}"></div>
-        <div th:insert="~{fragments/auth :: breadcrumb}"></div>
+        <div th:insert="~{fragments/auth/create-folder :: createFolder}"></div>
+        <div th:insert="~{fragments/auth/content :: content}"></div>
+        <div th:insert="~{fragments/auth/upload :: upload}"></div>
+        <div th:insert="~{fragments/auth/bread-crumb :: breadcrumb}"></div>
     </div>
     <div th:if="${searchResult}">
-        <div th:insert="~{fragments/auth :: searchContent}"></div>
+        <div th:insert="~{fragments/auth/searchcontent :: searchContent}"></div>
     </div>
 </div>
 
 <div sec:authorize="isAnonymous()">
-    <div th:insert="~{fragments/not-auth :: header}"></div>
+    <div th:insert="~{fragments/not-auth/header :: header}"></div>
 </div>
+
 
 <script th:src="@{/js/main.js}"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>

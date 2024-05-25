@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="breadcrumb">
+  <div class="container">
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <th:block th:if="${breadCrumb != null}">
+          <li class="breadcrumb-item">
+            <a href="/">Home</a>
+          </li>
+          <th:block th:each="entry : ${breadCrumb.entrySet()}">
+            <li class="breadcrumb-item">
+              <a th:href="@{/(path=${entry.getValue()})}" th:text="${entry.getKey()}"></a>
+            </li>
+          </th:block>
+        </th:block>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
